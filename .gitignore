@@ -1,0 +1,25 @@
+# Dipendenze
+node_modules/
+
+# Segreti: NON vanno mai nel repository
+.env
+.env.*
+!.env.example
+
+# Risultati di build
+dist/
+build/
+.vite/
+
+# Log
+*.log
+npm-debug.log*
+
+# File del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
