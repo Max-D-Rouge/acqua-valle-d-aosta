@@ -54,3 +54,16 @@ Solo attività realmente svolte. I dati mancanti sono da compilare.
 - File modificati: DECISIONI_TECNICHE.md
 - Test effettuati: nessuno. Commit Git: nessuno (repository non ancora creato).
 - Da fare: installare/configurare Git su A, creare il repository GitHub, primo commit.
+
+---
+
+## 2026-09-28 - FASE 1: primo commit e push
+
+- Sviluppatore: Studente A (Max).
+- Obiettivo: creare il repository Git locale e inviarlo a GitHub.
+- Attività svolte: `git init -b main`, `git add` dei sei file di Fase 0, primo commit, collegamento a `origin` (repository privato `Max-D-Rouge/acqua-valle-d-aosta`), push di `main`.
+- Problemi: `git init` ha lasciato un file di blocco (`index.lock`) e un file vuoto nella cartella `.git`, non eliminabili senza permesso. Soluzione: permesso di eliminazione concesso da Max, rimossi i due file. Il repository era pubblico ed è stato reso privato da Max; l'accesso di Claude a GitHub è stato revocato da Max, quindi il push è stato fatto da Max sul proprio Mac.
+- Test effettuati: `git log` e `git branch -vv` in locale mostrano `main` allineato a `origin/main` al commit `635f8c4`. Il contenuto sul sito GitHub non è stato verificato da Claude.
+- Risultato: `main` su GitHub al commit `635f8c4`. I rami `dev-studente-A` e `dev-studente-B` esistono ancora solo in locale (non ancora inviati a GitHub).
+- Commit Git: `635f8c4` (Fase 0: documentazione iniziale del progetto).
+- Attività successive: inviare i due rami a GitHub; invitare Studente B in Settings -> Collaborators; Studente B clona il repository; risposta del docente su PWA e Supabase (DT-012).
