@@ -1,6 +1,8 @@
 # Decisioni tecniche
 
-Ultima revisione: 2026-09-28 (FASE 2 - Tecnologie, avvio: nessuna nuova approvazione; D04 riaperta; D05, D06, D09, D10 resi neutrali rispetto ai candidati; nuove D22, D23). Analisi completa delle alternative: `docs/15_TECNOLOGIE.md`. I requisiti (COSA fa il sistema) sono in `docs/01_PROGETTO.md`; questo file contiene solo le decisioni su COME realizzarlo.
+Ultima revisione: 2026-10-26 (Expo al posto di Flutter su indicazione dello Studente A: nuova D28, D03 riaperta, D24 superata; nessuna conferma di B né del docente). Revisione precedente: 2026-10-05 (FASE 2, preparazione del pitch: lo Studente A ha indicato **Flutter** al posto della PWA, con **app vera per iPhone e Android** e **web app** nel browser per i PC; Android si prova con l'emulatore di Android Studio, consigliato dal docente. Modificate D01, D02, D03, D04, D05, D06, D12, D15, D20, D21; nuove D24, D25, D26). Revisione precedente: 2026-10-02 (D23 APPROVATA, Node.js 24 LTS con nvm). Revisione ancora precedente: 2026-09-28 (FASE 2 - Tecnologie, avvio: D04 riaperta; D05, D06, D09, D10 resi neutrali rispetto ai candidati; nuove D22, D23). Analisi completa delle alternative: `docs/15_TECNOLOGIE.md`. I requisiti (COSA fa il sistema) sono in `docs/01_PROGETTO.md`; questo file contiene solo le decisioni su COME realizzarlo.
+
+Revisione 2026-10-12: **solo correzioni documentali, nessuna decisione è stata cambiata**. Aggiunti: la riga D27 nella tabella, le precisazioni su chi ha approvato, lo stato dei rami Git e la sezione "Differenze rispetto alla versione pubblicata".
 
 ## Regole di questo file
 
@@ -13,6 +15,7 @@ Ultima revisione: 2026-09-28 (FASE 2 - Tecnologie, avvio: nessuna nuova approvaz
   - **Proposto**: suggerimento non ancora approvato;
   - **Da verificare**: informazione che non conosciamo o che va provata in pratica.
 - Fonti consultate il 2026-09-28. Prezzi, limiti e versioni cambiano: vanno ricontrollati prima dell'uso.
+- **Chi ha approvato** (stato al 12/10/2026): salvo indicazione diversa, APPROVATA significa approvata dallo Studente A. Nei documenti non risulta una conferma scritta dello Studente B né del docente per nessuna decisione; per D23–D27 in particolare non c'è alcuna conferma esplicita. Una decisione "condivisa" lo diventa solo quando B la conferma per iscritto (e, dove serve, il docente risponde).
 - Le versioni con le vecchie schede DT-001...DT-013 sono nella storia Git (commit `635f8c4`, `b4a9dc3`). La prima revisione D01-D19 non era stata salvata in un commit: questa la sostituisce (le differenze sono riassunte in `DIARIO_SVILUPPO.md`).
 
 ---
@@ -21,29 +24,53 @@ Ultima revisione: 2026-09-28 (FASE 2 - Tecnologie, avvio: nessuna nuova approvaz
 
 | ID | Decisione | Scelta proposta | Motivazione | Alternative | Stato |
 | -- | --------- | --------------- | ----------- | ----------- | ----- |
-| D01 | Piattaforme | Windows, Linux, macOS, iOS, Android | Requisito confermato dallo Studente A | Solo iOS + Android | APPROVATA |
-| D02 | Tipo di app | PWA (web app installabile) | Analisi delle 22 funzionalità: nessuna "non adatta"; alcune con limitazioni da provare | React Native + Expo; PWA + Capacitor | DA DECIDERE |
-| D03 | React Native + Expo + MapLibre React Native | Non usarli | Non copre desktop; SDK Expo attuale non compilabile per iOS sul Mac Intel dello Studente A | Vedi D02 | BLOCCATA |
-| D04 | Linguaggio | Candidati: TypeScript, JavaScript | Riaperta in Fase 2 su indicazione dello Studente A | — | DA DECIDERE |
-| D05 | Frontend: framework e strumento di sviluppo | Candidati: React, nessun framework (HTML/CSS/JS); strumento Vite (usabile con entrambi) | Confronto in `15_TECNOLOGIE.md` §3 | Vue, Svelte (non analizzati) | DA DECIDERE |
-| D06 | Libreria della mappa | Candidati: MapLibre GL JS, Leaflet, OpenLayers | Confronto in `15_TECNOLOGIE.md` §5.2; test pratico | — | DA DECIDERE |
+| D01 | Piattaforme | App per iPhone e Android; web app nel browser per i PC (Windows, Linux, macOS) | Indicazione dello Studente A (2026-10-05) | Tutte e 5 come app installate; PWA per tutto | DA DECIDERE (indicata da A; B chiede conferma comune e risposta del docente) |
+| D02 | Tipo di app | PWA come soluzione unica | Superata il 2026-10-05: app vera per i telefoni + web app per i PC, entrambe con Flutter (D24) | Flutter (D24) | BLOCCATA |
+| D03 | React Native + Expo + MapLibre React Native | Expo in uso in via provvisoria (D28); MapLibre React Native non usato | Build iOS ancora bloccata sul Mac Intel di A (Xcode 26.4+); si lavora con Expo Go | Flutter (D24, superata) | RIAPERTA (vedi D28) |
+| D04 | Linguaggio | Dart (segue D24); TypeScript/JavaScript non servono più | Flutter usa solo Dart | TypeScript, JavaScript | DA DECIDERE (segue D24) |
+| D05 | Frontend: framework | Flutter (D24), sia per le app sia per la web app | Un solo codice | React + Vite | DA DECIDERE (segue D24) |
+| D06 | Libreria della mappa | Proposta: `flutter_map` (funziona su telefoni e web) | `15_TECNOLOGIE.md` §15 | MapLibre GL JS, Leaflet, OpenLayers | DA DECIDERE |
 | D07 | Tile pubblici openstreetmap.org come fonte principale | Non usarli | Best-effort, bloccabili senza preavviso | — | APPROVATA |
 | D08 | Provider dei tile | Candidati: OpenFreeMap, VersaTiles, MapTiler | Scelta dopo un test pratico | Protomaps (self-hosting) | DA DECIDERE |
 | D09 | Backend e autenticazione | Candidati: Supabase, Firebase, backend scritto da noi | Confronto in `15_TECNOLOGIE.md` §4.1 | PocketBase, Appwrite (non analizzati) | DA DECIDERE |
 | D10 | Database | Candidati: relazionale (PostgreSQL), a documenti (Firestore) | Segue D09; `15_TECNOLOGIE.md` §4.2 | SQLite | DA DECIDERE |
 | D11 | Coordinate | Proposto: `latitude` + `longitude` numerici nell'MVP; PostGIS aggiungibile dopo | Per la scala del progetto basta; meno concetti; nessuna funzione `rpc()` obbligatoria | PostGIS `geography(Point)` subito | DA DECIDERE |
-| D12 | Hosting HTTPS | Candidati: Cloudflare Pages, Netlify | Serve HTTPS; GitHub Pages non disponibile per repository privati con account gratuito | Vercel Hobby, GitHub Pages | DA DECIDERE |
+| D12 | Hosting HTTPS | Candidati: Cloudflare Pages, Netlify (per la web app dei PC) | La web app va pubblicata in HTTPS (serve anche al GPS nel browser); GitHub Pages non disponibile per repository privati con account gratuito | Vercel Hobby, GitHub Pages | DA DECIDERE |
 | D13 | Stato "acqua potabile" | 3 valori con predefinito "non verificato" + avviso; campo "fonte" in P2 | Prudenza; analisi in `01_PROGETTO.md` §5.3 | Sì/no; valori basati sul cartello | DA DECIDERE |
 | D14 | Git e rami | `main`, `dev-studente-A`, `dev-studente-B` | `main` stabile | — | APPROVATA |
-| D15 | Ruoli e dispositivi | A = Max (MacBook Air Intel, iPhone); B = Mayo (Windows 11, iPhone 15 Pro Max) | Dati riferiti da entrambi | — | DA DECIDERE |
+| D15 | Ruoli e dispositivi | A = Max (MacBook Air Intel, iPhone): interfaccia, mappa, GPS, build iPhone; B = Mayo (Windows 11, iPhone 15 Pro Max): database, login, grafica, test Android con emulatore (proposta del pitch) | Dati riferiti da entrambi | — | DA DECIDERE |
 | D16 | Numerazione documenti | 14 documenti originali | Richiesta dello Studente A | 12 documenti | APPROVATA |
 | D17 | Numerazione fasi | Fasi 0-19 originali (Fase 1 = Requisiti) | Lo Studente A ha avviato ufficialmente la Fase 1 = Requisiti | Vecchio elenco | APPROVATA |
 | D18 | Segreti | Mai nel repository; `.env` ignorato da Git | Sicurezza | — | APPROVATA |
 | D19 | Domande al docente | Vedi scheda | Da esse dipendono D02, D09, D12 | — | DA DECIDERE |
-| D20 | Architettura complessiva | Vedi scheda | Sintesi delle proposte D02-D12 | — | DA DECIDERE |
+| D20 | Architettura complessiva | App Flutter (iPhone, Android, web) + Supabase (proposta) | Sintesi di D24, D09, D06, D12, D21 | Architettura PWA (superata) | DA DECIDERE |
 | D22 | Storage delle immagini (dopo l'MVP) | Candidati: Supabase Storage, Firebase Storage (richiede piano Blaze con carta), storage proprio | `15_TECNOLOGIE.md` §4.4 | — | DA DECIDERE |
-| D23 | Ambiente di sviluppo locale | Node.js su entrambi i computer; Docker solo se si esegue il backend in locale | Dipende dai computer (dati mancanti) | — | DA DECIDERE |
-| D21 | Offline | MVP senza offline (A); cache minima dell'interfaccia in P1 (B); offline completo non previsto (C) | Policy dei tile e semplicità; analisi in `01_PROGETTO.md` §11 | Mappe offline | DA DECIDERE |
+| D23 | Ambiente di sviluppo locale | Node.js 24 LTS (24.21.0, npm 11.19.0) su entrambi i computer; su A gestito con nvm, non con Homebrew; Docker non installato | Stessa versione principale per A e B; 24 è Active LTS | Node 26 (Current); Node con Homebrew; Docker per backend locale | APPROVATA da A (conferma esplicita di B non registrata; già applicata; da rivedere se D24 viene approvata: con Flutter Node non serve per l'app) |
+| D21 | Offline | Mappa offline della Valle d'Aosta nelle app per telefono, dopo l'MVP, da una fonte che lo permetta | Richiesta dello Studente A (2026-10-05) | Nessun offline | DA DECIDERE |
+| D24 | Tecnologia dell'app | Flutter (linguaggio Dart): un solo codice per app iPhone, app Android e web app per PC | Scelta dello Studente A per il pitch (2026-10-05); `15_TECNOLOGIE.md` §15 | Tauri 2; PWA (D02) | SUPERATA il 2026-10-23 (vedi D28) |
+| D25 | Test su Android | Emulatore di Android Studio (consiglio del docente) | Nessun telefono Android disponibile | Telefono prestato | DA DECIDERE (prova pratica) |
+| D26 | Ordine dell'MVP | Mappa e GPS → punti letti dal database → registrazione e login → aggiunta punto | Indicazione dello Studente A (2026-10-05) | Registrazione per prima | APPROVATA dallo Studente A soltanto (conferma di B non registrata) |
+| D27 | Prototipo: gruppi di punti e icone | Clustering MapLibre (raggio 55 px, fino a zoom 13) e icone disegnate per tipo | Idea da HydrantMap, proposta di A (2026-10-07) | Pin uguali; marker HTML | PROPOSTA di A (da confermare con B) |
+| D28 | Tecnologia dell'app | React Native + Expo (TypeScript, Expo Router) | Indicazione di A (2026-10-23); D03, D24 | Flutter (D24), PWA (D02) | APPROVATA da A (26/10/2026); conferma di B non registrata e non richiesta |
+| D29 | Distribuzione e dati pubblici | Web app + file Android da GitHub; iPhone usa la web app; email/foto/account pubblici | Indicazione di A (2026-10-26); D28 | Apple Developer a pagamento; email non pubbliche | APPROVATA da A (26/10/2026); da verificare (web, Android, Xcode, privacy) |
+---
+
+## Differenze rispetto alla versione pubblicata (commit `bb9b849`) e approvazioni
+
+Stato al 12/10/2026. "Pubblicata" = contenuto del commit `bb9b849` (30/09), presente su `origin/dev-studente-A` e `origin/dev-studente-B`. Le modifiche locali non sono ancora state salvate con un commit. Nessuna riga è cambiata di stato in questa revisione: la tabella documenta soltanto le differenze.
+
+| ID | Versione pubblicata (`bb9b849`) | Versione locale (12/10) | Chi ha approvato / accordo |
+| -- | ------------------------------- | ----------------------- | -------------------------- |
+| D01 | APPROVATA, 5 piattaforme | DA DECIDERE, app iPhone/Android + web app per PC | La versione pubblicata era approvata da A. Il 05/10 B ha chiesto una conferma comune e la risposta del docente: nessuna conferma di B o del docente |
+| D02 | DA DECIDERE, "proposta principale" | BLOCCATA come soluzione unica | Cambiamento deciso da A il 05/10; B non lo ha confermato |
+| D04 | Tabella: DA DECIDERE (riaperta il 28/09); il diario del 28/09 la elenca tra le APPROVATE | DA DECIDERE (segue D24) | Incoerenza storica nel diario; lo stato valido è DA DECIDERE |
+| D23 | DA DECIDERE, senza versione | APPROVATA (Node 24.21.0, npm 11.19.0, nvm su A) | Approvata da A (verificata sul suo Mac il 30/09); conferma esplicita di B non registrata |
+| D24 | Non presente | DA DECIDERE (Flutter) | Proposta di A; B non conferma (05/10); nessuna risposta del docente |
+| D25 | Non presente | DA DECIDERE (emulatore Android) | Proposta di A, su consiglio del docente; prova pratica da fare |
+| D26 | Non presente | APPROVATA | Solo A; B non ha confermato |
+| D27 | Non presente | PROPOSTA | Proposta di A (07/10); da confermare con B |
+
+PWA e Flutter **non sono scelte definitive condivise**: D02 è bloccata come soluzione unica, D24 è solo una proposta di A.
 
 ---
 
@@ -160,13 +187,13 @@ Hosting del frontend: servizio con HTTPS (D12).
 
 ## D01 - Piattaforme da supportare
 
-- **Decisione**: Windows, Linux, macOS, iOS, Android.
-- **Problema**: definire dove deve funzionare l'app.
-- **Alternative**: solo smartphone.
-- **Scelta**: tutte e 5.
-- **Motivazione**: fatto, requisito confermato dallo Studente A il 2026-09-28.
-- **Conseguenze**: esclude soluzioni solo mobili (D03).
-- **Stato**: APPROVATA.
+- **Decisione**: app vera per **iPhone e Android**; **web app** usata dal browser per i PC (Windows, Linux, macOS).
+- **Problema**: definire dove deve funzionare l'app e in che forma.
+- **Alternative**: le 5 piattaforme come app installate (approvate il 2026-09-28); solo Windows, Linux, iOS come app (ipotesi intermedia del 2026-10-05, superata lo stesso giorno); PWA per tutto (D02).
+- **Scelta**: app per i telefoni + web app per i PC.
+- **Motivazione**: indicazione dello Studente A del 2026-10-05. Per Android, che nessuno dei due possiede, il docente ha consigliato l'emulatore di Android Studio (D25).
+- **Conseguenze**: per i PC non servono programmi da installare né build separate (niente Visual Studio, niente computer Linux): basta un browser. La web app va pubblicata in HTTPS (D12). L'app iPhone si può compilare solo sul Mac di A (D24).
+- **Stato**: DA DECIDERE. Indicata dallo Studente A il 2026-10-05; lo Studente B (05/10) è d'accordo solo se la confermiamo insieme e la chiediamo al docente (§19 n. 1 di `01_PROGETTO.md`).
 
 ---
 
@@ -181,13 +208,13 @@ Hosting del frontend: servizio con HTTPS (D12).
   - manifest con `name` o `short_name`, `icons` 192 e 512 px, `start_url`, `display` (`standalone` o simili), senza `prefer_related_applications: true` - web.dev (criteri Chrome);
   - service worker: nella pagina attuale dei criteri Chrome non compare come requisito; serve comunque per la cache dei file dell'app - web.dev, vite-plugin-pwa;
   - iOS: nessun criterio tecnico obbligatorio, qualsiasi sito si può aggiungere alla Home; con manifest o `apple-touch-icon` si controllano icona e apertura senza barra del browser - WebKit.
-- **Scelta**: proposta PWA.
+- **Scelta**: proposta PWA fino al 2026-10-05. **Superata**: lo Studente A ha scelto app vere per i telefoni e una web app per i PC, entrambe con Flutter (D24). L'analisi sui limiti del browser (GPS solo in HTTPS, permessi) resta valida per la web app.
 - **Svantaggi**: vedi limitazioni SL/DV; niente store; niente GPS in background.
 - **Da verificare prima dell'approvazione**:
   1. prova pratica su iPhone dello Studente A e sul telefono dello Studente B (mappa, GPS, fotocamera, installazione);
   2. risposta del docente (D19);
   3. conferma dello Studente B.
-- **Stato**: DA DECIDERE.
+- **Stato**: BLOCCATA dal 2026-10-05 come soluzione unica (era DA DECIDERE).
 
 ---
 
@@ -201,7 +228,7 @@ Hosting del frontend: servizio con HTTPS (D12).
   - Non copre Windows e Linux con la stessa mappa (D01).
 - **Alternative**: D02.
 - **Scelta**: non adottare.
-- **Stato**: BLOCCATA. Si sblocca solo se cambiano D01 o i dispositivi disponibili.
+- **Stato**: RIAPERTA il 2026-10-23 (vedi D28): Expo è in uso con Expo Go, ma il blocco su iPhone e su MapLibre React Native non è risolto. Stato precedente: BLOCCATA. Si sbloccava solo se cambiavano D01 o i dispositivi disponibili. Nota 2026-10-05: con le nuove piattaforme (telefoni + web) resta bloccata per l'iPhone (Xcode richiesto non installabile sul Mac Intel di A); l'app si fa con Flutter (D24).
 
 ---
 
@@ -212,7 +239,8 @@ Hosting del frontend: servizio con HTTPS (D12).
 - **Motivazione (proposta)**: MapLibre GL JS è scritta in TypeScript; template ufficiale Vite `react-ts`; vale per qualsiasi alternativa (A, B o C).
 - **Svantaggi**: concetto in più.
 - **Storia**: segnata APPROVATA in Fase 0; **riaperta il 2026-09-28 all'avvio della Fase 2** su indicazione dello Studente A, che ha chiesto di non considerare approvata nessuna tecnologia.
-- **Stato**: DA DECIDERE.
+- **Aggiornamento 2026-10-05**: con Flutter (D24) il linguaggio è **Dart**; la scelta TypeScript/JavaScript non serve più.
+- **Stato**: DA DECIDERE (segue D24).
 
 ---
 
@@ -222,7 +250,8 @@ Hosting del frontend: servizio con HTTPS (D12).
 - **Fatti**: Vite 8 richiede Node.js 20.19+ o 22.12+; esiste il template `react-ts`. Node.js 22 e 24 sono versioni LTS. La guida React di Supabase usa Vite con le variabili `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`. MapLibre documenta la configurazione del worker con Vite.
 - **Alternative**: HTML/JS senza librerie (disordinato con molte schermate); Vue/Svelte (non analizzati).
 - **Da verificare**: Node.js installabile sui computer di A e B (versione di macOS di A ancora sconosciuta).
-- **Stato**: DA DECIDERE (dipende da D02).
+- **Aggiornamento 2026-10-05**: React + Vite non servono più; app e web app si costruiscono con Flutter (D24).
+- **Stato**: DA DECIDERE (segue D24).
 
 ---
 
@@ -231,7 +260,8 @@ Hosting del frontend: servizio con HTTPS (D12).
 - **Fatti**: libreria TypeScript, WebGL, browser; nessuna chiave richiesta dalla libreria; `GeolocateControl` per la posizione dell'utente (richiede HTTPS).
 - **Alternative**: Leaflet (più semplice, soprattutto tile raster).
 - **Da verificare**: prestazioni sui telefoni reali.
-- **Stato**: DA DECIDERE (dipende da D02 e da un test pratico).
+- **Aggiornamento 2026-10-05**: per Flutter la proposta è `flutter_map`, che funziona su tutte le piattaforme di Flutter (telefoni e web). La sua documentazione avverte che i tile pubblici di OpenStreetMap "NON sono liberi per tutti" e permette di usare tile di un altro server o salvati sul dispositivo. Da verificare: tile vettoriali e mappa offline.
+- **Stato**: DA DECIDERE (dipende da D24 e da un test pratico).
 
 ---
 
@@ -321,13 +351,14 @@ A nell'MVP. Motivi concreti: il numero di punti previsto è piccolo; la mappa us
 
 | Servizio | Fatti (piano gratuito) | Nota |
 | -------- | ---------------------- | ---- |
-| GitHub Pages | Con GitHub Free solo per repository **pubblici**; il nostro è privato. Sito max 1 GB, 100 GB/mese | Richiederebbe repository pubblico o GitHub Pro (DV se disponibile gratis per studenti) |
+| GitHub Pages | Con GitHub Free solo per repository **pubblici**; la visibilità del nostro repository è contraddittoria nei documenti (diario 28/09: privato; Max, 12/10: pubblico): da confermare. Sito max 1 GB, 100 GB/mese | Richiederebbe repository pubblico o GitHub Pro (DV se disponibile gratis per studenti) |
 | Cloudflare Pages | 500 build/mese, 20.000 file, file max 25 MiB | Nessun limite di traffico indicato nella pagina limiti (DV) |
 | Netlify | 300 crediti/mese; al superamento i siti vanno in pausa fino al mese successivo; HTTPS incluso | — |
 | Vercel Hobby | Solo uso personale non commerciale; nessuna funzione di collaborazione in team | Poco adatto a due studenti |
 
 - **Problema aggiuntivo**: provare l'app sul telefono durante lo sviluppo richiede HTTPS (vedi analisi, punto 20).
 - **Da verificare**: età minima e condizioni per l'account; come fare test HTTPS dal telefono.
+- **Aggiornamento 2026-10-05**: serve per pubblicare la **web app per i PC** (Flutter web). Le app per telefono non usano l'hosting.
 - **Stato**: DA DECIDERE.
 
 ---
@@ -342,7 +373,7 @@ A nell'MVP. Motivi concreti: il numero di punti previsto è piccolo; la mappa us
 ## D14 - Git e rami
 
 - **Scelta**: `main` (stabile), `dev-studente-A`, `dev-studente-B`; non si lavora direttamente su `main`.
-- **Fatti** (verificati sul Mac dello Studente A): `main` allineato a `origin/main` (`635f8c4`); `dev-studente-A` (`b4a9dc3`) e `dev-studente-B` solo in locale.
+- **Fatti** (verificati sul Mac dello Studente A): `main` allineato a `origin/main` (`635f8c4`); `dev-studente-A` (`b4a9dc3`) e `dev-studente-B` solo in locale. **Aggiornamento 2026-10-12**: `origin/dev-studente-A` e `origin/dev-studente-B` puntano entrambi a `bb9b849` (verificato il 12/10/2026 su indicazione di Max; la sessione di Claude non ha potuto interrogare GitHub); `origin/main` è a `635f8c4` (copia locale). Il ramo locale `dev-studente-B` di Max è ancora a `635f8c4`: è una copia locale indietro, non una differenza su GitHub.
 - **Stato**: APPROVATA.
 
 ---
@@ -351,8 +382,9 @@ A nell'MVP. Motivi concreti: il numero di punti previsto è piccolo; la mappa us
 
 - **Studente A**: Max. MacBook Air Intel (modello e macOS DV), iPhone (versione iOS DV).
 - **Studente B**: Mayo. GitHub `invinco` (già collaboratore del repository). Windows 11 Pro (build 26200, 64 bit), 15,5 GB RAM, 49 GB liberi; Git 2.54.0, Node.js v24.21.0, npm 11.19.0; telefono iPhone 15 Pro Max. Dati riferiti dallo Studente B il 2026-09-30 tramite resoconto scritto (non verificati da questa chat).
-- **Conseguenza**: entrambi i telefoni sono iPhone. TEST ANDROID e TEST LINUX: NON DISPONIBILI con i dispositivi attuali.
-- **Stato**: DA DECIDERE (ruoli e dispositivi noti; resta da confermare con B chi fa cosa).
+- **Conseguenza**: entrambi i telefoni sono iPhone. TEST ANDROID: con l'emulatore di Android Studio (D25), meglio sul PC di B. TEST LINUX: basta un browser su Linux (web app); dispositivo ancora DV.
+- **Divisione proposta nel pitch (2026-10-05)**: A interfaccia, mappa e GPS (e build iPhone, possibile solo su Mac); B database, login e grafica (e test Android con emulatore).
+- **Stato**: DA DECIDERE (resta da confermare con B chi fa cosa).
 
 ---
 
@@ -383,14 +415,16 @@ A nell'MVP. Motivi concreti: il numero di punti previsto è piccolo; la mappa us
 
 Elenco aggiornato in Fase 1: `docs/01_PROGETTO.md` §19 (8 domande: PWA, Supabase, pubblicazione online, repository pubblico, regole della scuola su account/email/foto/privacy, scadenza, amministratore e moderazione delle foto, età minima per creare account sui servizi esterni).
 
-**Stato**: DA DECIDERE, in attesa di risposta.
+**Risposte riferite dallo Studente A il 2026-10-26** (nessuna conferma scritta del docente nel repository): 1 sì (app Expo con Expo Go accettabile); 2 sì (Supabase); 3 serve la pubblicazione online; 4 repository pubblico; 5 riferito da A: foto, account e soprattutto email pubblici per contattare chi carica informazioni false (da verificare con il docente, rischio privacy, vedi D29); 6 sì (scadenza aprile 2027); 7 scelta degli studenti, la gestirebbe A; 8 nessuna età minima. Dettaglio in `docs/01_PROGETTO.md` §19.
+
+**Stato**: PARZIALE: risposte riferite da A, nessuna conferma scritta del docente; sulla 5 (privacy) resta da verificare se le email pubbliche siano accettabili. Da D19 dipendono D02, D09, D12.
 
 ---
 
 ## D20 - Architettura complessiva
 
-- **Proposta**: vedi "Architettura proposta". Niente è stato implementato.
-- **Stato**: DA DECIDERE (dipende da D02, D05, D06, D08, D09, D11, D12).
+- **Proposta**: fino al 2026-10-05 vedi "Architettura proposta" (PWA, superata). Nuova proposta: un solo progetto **Flutter** che produce app iPhone, app Android e web app per i PC; mappa `flutter_map`; backend **Supabase** (esiste un pacchetto per Flutter, DV); web app pubblicata in HTTPS (D12); mappa offline nelle app dopo l'MVP (D21). Niente è stato implementato.
+- **Stato**: DA DECIDERE (dipende da D24, D06, D08, D09, D11, D12, D21).
 
 ---
 
@@ -404,12 +438,21 @@ Elenco aggiornato in Fase 1: `docs/01_PROGETTO.md` §19 (8 domande: PWA, Supabas
 
 ## D23 - Ambiente di sviluppo locale
 
-- **Problema**: quali programmi devono installare i due studenti.
-- **Fatti**: Node.js ha binari per macOS da 13.5 e Windows da 10; Vite richiede Node 20.19+ o 22.12+; Docker serve solo per eseguire Supabase in locale; Docker Desktop su Mac Intel supporta la versione corrente di macOS e le due precedenti.
-- **Verificato il 2026-09-29 (Mac di A)**: macOS 14.8.5, amministratore, Git 2.39.5, Node.js v26.0.0 (fase "Current", non LTS), npm 11.12.1, Docker 29.8.0; **solo 3,9 GB liberi su disco**. Dettagli in `docs/15_TECNOLOGIE.md` §1.3.
-- **Da decidere**: quale versione di Node.js usare (LTS o quella già installata) in modo uguale per A e B; se tenere Docker (non necessario con backend online).
-- **Da verificare**: computer di B.
-- **Stato**: DA DECIDERE.
+- **Problema**: quali programmi devono installare i due studenti, con quali versioni, in modo che i due ambienti siano uguali.
+- **Fatti**: Node.js ha binari per macOS da 13.5 e Windows da 10; Vite richiede Node 20.19+ o 22.12+; Node 24 è **Active LTS**, Node 22 Maintenance LTS, Node 26 "Current" (nodejs.org, verificato 2026-09-30); Docker serve solo per eseguire Supabase in locale.
+- **Alternative considerate**: tenere Node 26 su A (diverso da B, non LTS); installare Node 24 con Homebrew (escluso dallo Studente A); pacchetto ufficiale da nodejs.org (sovrascrive il collegamento di Homebrew in `/usr/local/bin`, una sola versione); **nvm** (version manager, più versioni, nessun Homebrew).
+- **Scelta**:
+  - **Node.js 24 LTS** su entrambi i computer. Versione attuale: **24.21.0**, npm **11.19.0**.
+  - Studente A (Mac Intel x86_64, macOS 14.8.5): Node installato e gestito con **nvm 0.40.3** (script ufficiale, cartella `~/.nvm`, righe di caricamento in `~/.zshrc`); `default -> 24`.
+  - **Homebrew non deve essere usato per gestire Node** nel progetto.
+  - Docker non installato: non serve finché il backend è online (D09).
+- **Motivazione**: stessa versione principale per A e B evita differenze tra gli ambienti; LTS è la versione consigliata per i progetti; nvm permette di cambiare versione in futuro senza Homebrew.
+- **Verificato sul Mac di A (2026-09-30, output del Terminale)**: `node -v` = v24.21.0, `npm -v` = 11.19.0, `which node` = `~/.nvm/versions/node/v24.21.0/bin/node`, `nvm current` = v24.21.0, `nvm alias default` = `default -> 24 (-> v24.21.0)` in un Terminale nuovo.
+- **Riferito dallo Studente A (non verificato da Claude)**: Node 26 di Homebrew rimosso (2026-10-02).
+- **Studente B**: Node v24.21.0, npm 11.19.0 (riferito 2026-09-30); metodo di installazione su Windows non noto.
+- **Conseguenze**: ogni nuovo Terminale di A carica nvm; chi aggiunge un computer al progetto deve installare Node 24. Se in futuro D09 richiedesse un backend in locale, la parte su Docker va rivalutata. Da valutare più avanti: un file `.nvmrc` nel repository con la versione concordata (modifica del progetto, non ancora fatta).
+- **Nota 2026-10-05**: lo Studente B ha chiesto di sospendere la modifica di Node 26 sul Mac di A. La modifica era già stata fatta il 30/09-02/10 (Node 24 con nvm, Node 26 di Homebrew rimosso): non c'è nulla da sospendere. Con Flutter (D24) Node non serve per l'app; D23 resta com'è e verrà rivista quando D24 sarà decisa.
+- **Stato**: APPROVATA da A. B ha riferito le stesse versioni (Node v24.21.0, npm 11.19.0) il 30/09, ma una conferma esplicita della decisione non è registrata (stato al 12/10/2026).
 
 ---
 
@@ -418,7 +461,109 @@ Elenco aggiornato in Fase 1: `docs/01_PROGETTO.md` §19 (8 domande: PWA, Supabas
 - **Problema**: in montagna la rete può mancare.
 - **Fatti**: policy OSM vieta prefetch dei tile; ToS OpenFreeMap vieta raccolta automatica senza permesso; il service worker può comunque salvare i file dell'app.
 - **Proposta**: A (nessun offline) nell'MVP; B (cache minima dell'interfaccia) in P1 insieme all'installazione; C (offline con sincronizzazione) non prevista. Analisi: `docs/01_PROGETTO.md` §11.
+- **Aggiornamento 2026-10-05**: lo Studente A vuole una **mappa offline** (in montagna spesso non c'è campo); è un punto di forza nel pitch. Proposta: dopo l'MVP, nelle **app per telefono**, una mappa della sola Valle d'Aosta salvata sul dispositivo, presa da una fonte che lo permette (es. estratto OSM in un file tipo PMTiles; DV). Vietato scaricarla dai server pubblici OSM (D07). Nella web app per PC l'offline non è previsto.
 - **Stato**: DA DECIDERE.
+
+---
+
+## D24 - Tecnologia dell'app: Flutter
+
+- **Decisione**: costruire con **Flutter** un'app vera per iPhone e Android e la web app per i PC.
+- **Problema**: il 2026-10-05 lo Studente A ha chiesto un'app vera per i telefoni e una web app per i PC.
+- **Spiegazione semplice**: Flutter è un kit di Google per creare app; si scrive il codice una volta nel linguaggio **Dart** e si ottengono l'app iPhone, l'app Android e un sito (web app).
+- **Alternative**: Tauri 2 (interfaccia web + Rust: due linguaggi); PWA per tutto (D02, sul telefono non è un'app vera); React Native + Expo (D03, bloccata).
+- **Fatti** (fonti in fondo, 2026-10-05):
+  - Flutter supporta Android, iOS 15+, web (Chrome, Firefox, Edge: ultime 2 versioni; Safari 15.6+), oltre a Windows, Linux e macOS;
+  - l'app iPhone si compila **solo su un Mac con Xcode**; l'app Android con Android Studio (su qualsiasi sistema); la web app con un browser Chrome;
+  - **Flutter sta abbandonando i Mac Intel**: "Future Flutter releases will require Apple Silicon"; nessuna data indicata;
+  - il Mac di A (Intel, macOS 14.8.5) può installare al massimo **Xcode 16.2** (Xcode 16.3 e successivi richiedono macOS 15);
+  - con un account Apple gratuito l'app va solo sui propri dispositivi (max 3) e il profilo scade dopo **7 giorni**: va reinstallata; pubblicarla sull'App Store richiede l'Apple Developer Program (99 USD/anno, contro il vincolo €0).
+- **Scelta**: Flutter (scelta dello Studente A per il pitch).
+- **Conseguenze**: D04 diventa Dart; cambiano D05 e D06; l'app iPhone dipende dal Mac di A; la web app va pubblicata (D12); piano B per iPhone: usare la web app anche sul telefono.
+- **Da verificare prima dell'approvazione**:
+  1. installare Flutter sul Mac di A e verificare che `flutter doctor` accetti Xcode 16.2;
+  2. installare un'app di prova su un iPhone (DV: Xcode 16.2 con iOS aggiornato);
+  3. installare Flutter e Android Studio sul PC di B, creare un'app di prova e avviarla nell'emulatore Android (D25) e nel browser (web);
+  4. conferma dello Studente B e del docente (domanda §19 n. 1 di `01_PROGETTO.md`).
+- **Rete di sicurezza (punto sollevato dallo Studente B, 05/10)**: il piano B "web app su iPhone" copre solo il problema dell'installazione su iPhone, **non** il rischio di non imparare Dart e Flutter in tempo, perché anche la web app è fatta in Flutter. Proposta: prova a tempo fino a **fine novembre 2026**: se entro quella data non abbiamo in Flutter una mappa con alcuni punti di prova funzionante sul web e su almeno un telefono (o emulatore), si torna alla PWA (D02: React + Vite + MapLibre GL JS), già analizzata e utilizzabile anche sui telefoni dal browser. Da confermare da entrambi.
+- **Stato**: SUPERATA il 2026-10-23 su indicazione dello Studente A (vedi D28). Prima era DA DECIDERE: lo Studente B (05/10) non aveva confermato. Testo conservato come storico.
+
+---
+
+## D25 - Test su Android con l'emulatore di Android Studio
+
+- **Decisione**: provare l'app Android con l'emulatore di Android Studio, come consigliato dal docente.
+- **Problema**: nessuno dei due ha un telefono Android.
+- **Spiegazione semplice**: un emulatore è un programma che simula un telefono Android sul computer.
+- **Fatti** (developer.android.com, 2026-10-05): per un'esperienza buona l'emulatore richiede **16 GB di RAM**, **16 GB di disco** e Windows 10+ o macOS 12+ a 64 bit; con meno risorse "potrebbe funzionare, ma non in modo fluido".
+- **Conseguenza**: il Mac di A (8 GB RAM, circa 15 GB liberi) è sotto i requisiti; il PC di B (15,5 GB RAM, 49 GB liberi) è vicino ai requisiti. Proposta: emulatore sul PC di B.
+- **Limiti**: nell'emulatore la posizione GPS si imposta a mano; non sostituisce del tutto un telefono reale.
+- **Da verificare**: installazione e avvio dell'emulatore sul PC di B.
+- **Stato**: DA DECIDERE (prova pratica).
+
+---
+
+## D26 - Ordine di sviluppo dell'MVP
+
+- **Decisione**: 1) mappa con la posizione GPS; 2) punti d'acqua letti dal database; 3) registrazione e login; 4) aggiunta di un nuovo punto.
+- **Problema**: in che ordine costruire l'MVP.
+- **Alternative**: "registrazione → login → mappa → ..." (istruzioni del progetto); MVP in due tappe (RQ-04, `01_PROGETTO.md` §4.2), che aveva già questo spirito.
+- **Motivazione**: indicazione dello Studente A del 2026-10-05; prima si vede la mappa funzionante, poi si affronta la parte degli account.
+- **Conseguenze**: i primi punti di prova vengono inseriti dagli sviluppatori; RQ-04 si considera risolta in questo senso.
+- **Stato**: APPROVATA dallo Studente A soltanto. Non risulta una conferma di B (stato al 12/10/2026): non è una decisione condivisa.
+
+---
+
+## D27 - Prototipo: gruppi di punti e icone per tipo
+
+- **Decisione**: nella mappa del prototipo i punti vicini si raggruppano (clustering) e ogni punto ha un'icona disegnata in base al tipo.
+- **Problema**: con molti punti, da lontano la mappa si riempie di pin uguali; non si capisce dove ci sono più fontane né di che tipo sono.
+- **Alternative**: pin uguali per tutti (com'era); marker HTML (si staccano dal terreno in 3D); gruppi con testo dei font della mappa.
+- **Scelta**: clustering di MapLibre (raggio 55 px, fino allo zoom 13), cerchi più grandi con più punti, numero disegnato come immagine; icone disegnate con canvas per tipo, potabilità indicata con colore + simbolo.
+- **Motivazione**: idea presa da HydrantMap (hydrantmap.org), proposta dello Studente A del 2026-10-07; il numero come immagine evita che i gruppi spariscano se i font non si scaricano (offline).
+- **Conseguenze**: più codice in `app.js` (disegni delle icone); nell'app vera (Flutter, D24) servirà l'equivalente (per flutter_map esistono plugin di clustering, da verificare).
+- **Stato**: PROPOSTA dallo Studente A, da confermare con lo Studente B.
+
+---
+
+## D28 - Tecnologia dell'app: React Native + Expo
+
+- **Decisione**: costruire l'app per iPhone e Android con **React Native + Expo** (TypeScript, Expo Router), al posto di Flutter (D24).
+- **Problema**: il 2026-10-23 lo Studente A ha chiesto di abbandonare Flutter e iniziare subito a sviluppare con Expo.
+- **Spiegazione semplice**: React Native è un kit per fare app per telefono con JavaScript/TypeScript; Expo è uno strumento che semplifica sviluppo e prova: con l'app Expo Go si vede l'app sul telefono senza compilarla.
+- **Alternative**: Flutter (D24, superata); PWA (D02, bloccata come soluzione unica).
+- **Fatti** (documentazione ufficiale, controllata il 2026-10-19/23):
+  - Expo SDK 58 richiede React Native 0.88, Node.js 22.13+ e, per le build iOS locali, Xcode 26.4+, che il Mac Intel di A non può installare;
+  - Expo Go non richiede Xcode e include `react-native-webview` e `expo-location`;
+  - MapLibre React Native non funziona in Expo Go (serve una development build); su iPhone una build nel cloud (EAS) richiede l'Apple Developer Program, 99 USD/anno, contro il vincolo €0;
+  - i tile pubblici di OpenStreetMap vietano il download offline e non danno garanzie di servizio.
+- **Cosa è stato fatto**: `app-mobile/` creato con `create-expo-app` (SDK 58); mappa MapLibre GL JS in una WebView con stile OpenFreeMap (come nel prototipo web); GPS con `expo-location` solo su richiesta dell'utente; punti letti da Supabase (tabella `punti`, `database/01_punti.sql`, lettura pubblica e nessuna scrittura). Commit `dde27f3` e `4c44a91` su `dev-studente-A`.
+- **Scelta**: Expo, per iniziare (scelta dello Studente A).
+- **Conseguenze**: Dart non serve più; D04 (linguaggio) torna a TypeScript, ancora DA DECIDERE; D06 (mappa): al momento MapLibre GL JS in una WebView, provvisorio; su iPhone si lavora con Expo Go e non esiste una build installabile senza Apple Developer a pagamento; la web app per i PC non è stata decisa.
+- **Non verificato**: Android (Mayo su Windows), mappa offline, limiti e pausa dei progetti Supabase gratuiti, pubblicazione sugli store.
+- **Stato**: APPROVATA dallo Studente A il 2026-10-26 ("decido io, non serve la conferma di Mayo"). **Conferma dello Studente B non registrata e non richiesta da A.** Il docente, secondo quanto riferito da A, ha risposto di sì alla domanda 1 del §19 (app Expo con Expo Go accettabile).
+  - Aggiornamento 2026-10-26: lo Studente A ha ribadito "useremo Expo e non Flutter". Nessuna conferma scritta di B o del docente è registrata: lo stato resta PROPOSTA finché non viene registrata.
+
+---
+
+## D29 - Distribuzione, pubblicazione e dati pubblici degli utenti
+
+- **Decisione (proposta di A, 2026-10-26)**: pubblicare da GitHub (1) una web app, (2) un file installabile per Android; su iPhone gli utenti usano la web app. All'esame l'app verrebbe mostrata con Xcode. Foto, account e soprattutto email degli utenti sarebbero pubblici, per poter contattare chi carica informazioni false.
+- **Problema**: il docente ha confermato (riferito da A) la pubblicazione online e il repository pubblico; senza Apple Developer a pagamento un'app vera per iPhone non è distribuibile (D28, V-01).
+- **Fatti** (documentazione ufficiale, 2026-10-26):
+  - web app: `npx expo export -p web` crea la cartella `dist`; per GitHub Pages si imposta `experiments.baseUrl` a `/nome-del-repository` in `app.json` e si usa `gh-pages --nojekyll -d dist` (guida "Publishing websites", docs.expo.dev);
+  - EAS Build, piano Free: "un numero limitato di build a bassa priorità" al mese; la pagina dei piani non dà i numeri (docs.expo.dev/billing/plans);
+  - su iPhone non si installa da GitHub: serve l'Apple Developer Program, 99 USD/anno (D28).
+- **Da verificare (DV)**:
+  1. **Web**: la mappa di `app-mobile` usa `react-native-webview`, che per quanto so non è pensato per il web: la mappa potrebbe richiedere un'altra soluzione nella versione web. Non è stato provato nessun `expo export -p web`.
+  2. **Android**: numeri e condizioni del piano Free di EAS; alternativa da analizzare: build locale con Android Studio sul PC di B.
+  3. **Xcode all'esame**: D28 riporta che Expo SDK 58 richiede Xcode 26.4+ per le build iOS locali e che il Mac Intel di A non può installarlo. Mostrare l'app con Xcode quindi potrebbe non essere possibile; alternative già disponibili: Expo Go sull'iPhone (provato il 23-26/10) e la web app.
+  4. **Privacy**: email pubbliche di utenti reali (senza età minima, quindi anche minorenni) espongono a spam e molestie e richiedono una base giuridica e un'informativa. Alternative da valutare con il docente: nome utente pubblico + pulsante "contatta/segnala" che inoltra il messaggio senza mostrare l'email; email visibile solo agli amministratori.
+- **Aggiornamento 2026-10-26 (14:52), scelta di A sulla privacy**: gli utenti hanno un **nome utente pubblico**; l'email **non** è mai mostrata. Chi vuole segnalare o contattare un utente usa un pulsante "contatta/segnala" e il messaggio viene inoltrato senza rivelare l'email. Conseguenze da progettare (Fasi 6-8 e 14): nome utente separato dall'email nella tabella dei profili; un modo per inoltrare i messaggi (serve un pezzo di backend e probabilmente un servizio di invio email: limiti e costi DV); regole di accesso (RLS) che impediscano di leggere le email degli altri.
+- **Intenzione di A sull'esame**: ottenere Xcode con un hackintosh. Non analizzato né deciso: vedi nota sotto.
+- **Nota hackintosh (DV)**: la licenza di macOS ammette l'uso solo su computer Apple; non è verificato che una versione di macOS adatta a Xcode 26.4+ funzioni sul tuo hardware. Non è un requisito per l'esame: Expo Go sull'iPhone e la web app sono alternative già disponibili.
+- **Nota download (DV)**: un'app iPhone scaricabile da chiunque richiede in ogni caso l'Apple Developer Program (99 USD/anno), con o senza Xcode. Gratis resta: codice su GitHub (chi vuole se la compila), web app per tutti, file installabile per Android.
+- **Stato**: APPROVATA da A il 2026-10-26 ("decido io"); conferma di B non registrata e non richiesta da A. A (14:56) considera sufficiente il pulsante "contatta/segnala" per la privacy degli utenti e non chiede altre verifiche al docente. Resta comunque vero che l'app conserva le email degli utenti: con utenti reali servono un'informativa privacy e regole di accesso (RLS) che le proteggano (era la domanda 5 del §19: la scelta sul contatto riduce il rischio privacy ma resta da verificare).
 
 ---
 
@@ -439,6 +584,17 @@ Elenco aggiornato in Fase 1: `docs/01_PROGETTO.md` §19 (8 domande: PWA, Supabas
 | DT-011 Stato potabile | D13 |
 | DT-012 Docente | D19 |
 | DT-013 Ruoli | D15 |
+
+## Fonti consultate il 2026-10-05
+
+- Flutter, piattaforme supportate: https://docs.flutter.dev/reference/supported-platforms
+- Flutter, installazione (nota sui Mac Intel): https://docs.flutter.dev/install/manual
+- Flutter, deprecazione di Intel su macOS: https://github.com/flutter/flutter/issues/188328
+- flutter_map: https://docs.fleaflet.dev/
+- Apple, requisiti di Xcode: https://developer.apple.com/xcode/system-requirements
+- Apple, account gratuito e programma a pagamento: https://developer.apple.com/support/compare-memberships/
+- Android Emulator, requisiti: https://developer.android.com/studio/run/emulator
+- OSMF Tile Usage Policy: https://operations.osmfoundation.org/policies/tiles/
 
 ## Fonti ufficiali consultate (2026-09-28)
 

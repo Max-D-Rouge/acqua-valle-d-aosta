@@ -1,6 +1,10 @@
 # 01 - Progetto e requisiti
 
-Stato del documento: FASE 1 - Requisiti, revisione 3 (2026-09-28): revisione di coerenza interna dopo la revisione privacy. In attesa di conferma degli studenti e delle risposte del docente.
+Stato del documento: FASE 1 - Requisiti, revisione 4 (2026-10-05): aggiornamenti emersi dalla preparazione del pitch (piattaforme, ordine dell'MVP, verifica Sì/No, mappa offline). Revisione 3 (2026-09-28): coerenza interna dopo la revisione privacy. In attesa di conferma dello Studente B e delle risposte del docente.
+
+**Stato di approvazione (12/10/2026)**: nessuna conferma scritta dello Studente B né del docente è registrata per questo documento. Le modifiche della revisione 4 sono proposte dello Studente A e, rispetto alla versione pubblicata (commit `bb9b849`, revisione 3), non sono ancora state salvate con un commit.
+
+> **Aggiornamento 2026-10-05 (indicazioni dello Studente A).** (1) App vera per **iPhone e Android**, **web app** nel browser per i PC (D01, D24 Flutter) — da confermare con lo Studente B e con il docente. (2) Android si prova con l'**emulatore di Android Studio**, come consigliato dal docente (D25). (3) Ordine dell'MVP: mappa e GPS → punti dal database → registrazione e login → aggiunta punto (D26, RQ-04). (4) **Verifica con tasto Sì/No**: lo stato di un punto cambia dopo 3 risposte uguali (§9, RQ-14). (5) **Mappa offline** desiderata nelle app per telefono, dopo l'MVP (§11, D21). (6) Posizione GPS: confermato che non viene salvata, tranne quando l'utente aggiunge un punto (§6). Le sezioni sotto sono state aggiornate dove indicato con "2026-10-05".
 
 **Valori numerici**: tutti i numeri usati nei requisiti (tempi, distanze, dimensioni, lunghezze dei testi, quantità, soglie) sono **proposte provvisorie**, elencate in RQ-09 e da confermare dopo le prime prove. Un requisito o un criterio di accettazione che usa un numero si intende riferito al valore che verrà approvato in RQ-09.
 
@@ -49,7 +53,7 @@ Note:
 
 ## 2. Piattaforme (contesto)
 
-Fatto: l'app deve funzionare su Windows, Linux, macOS, iOS e Android (D01).
+Fatto (aggiornato 2026-10-05): **app vera per iPhone e Android**; per i PC (Windows, Linux, macOS) una **web app** usata dal browser (D01). Prima (2026-09-28) era richiesto il funzionamento su tutte e 5 le piattaforme senza indicare la forma.
 
 ### Sito responsive, PWA, app nativa: differenze
 
@@ -57,7 +61,7 @@ Fatto: l'app deve funzionare su Windows, Linux, macOS, iOS e Android (D01).
 - **PWA installabile**: un sito responsive con un *manifest* (nome, icone, modalità di apertura) servito in HTTPS, di solito con un *service worker* (script che salva i file dell'app). Si "installa" dal browser e si apre da un'icona. Su iPhone si installa a mano (Condividi → "Aggiungi alla schermata Home"); su Android Chrome propone l'installazione.
 - **App nativa**: programma compilato per iOS o Android, distribuito tramite store o build di sviluppo.
 
-Proposto (non approvato): PWA (D02). Analisi di idoneità: `DECISIONI_TECNICHE.md`.
+Proposto fino al 2026-10-05: PWA (D02), ora superata. Proposta attuale: **Flutter** (D24), un solo codice per le app dei telefoni e per la web app. Dettagli: `DECISIONI_TECNICHE.md`.
 
 ---
 
@@ -133,6 +137,8 @@ Stesso contenuto, ordine diverso, per avere presto qualcosa di funzionante da pr
 - **MVP-2 (scrittura)**: registrazione, login/logout, aggiunta punto, salvataggio.
 
 Stato: **proposta, DA DECIDERE (RQ-04)**. Finché RQ-04 è aperta, l'MVP resta un'unica versione con il contenuto di §4.3; la divisione in due tappe riguarda solo l'ordine di lavoro e non cambia i requisiti.
+
+**Aggiornamento 2026-10-05 (D26)**: lo Studente A ha fissato l'ordine di lavoro: 1) mappa con la posizione GPS; 2) punti d'acqua letti dal database; 3) registrazione e login; 4) aggiunta di un nuovo punto. È coerente con le due tappe proposte sopra.
 
 ### 4.3 MVP finale
 
@@ -348,6 +354,8 @@ Proposta di distinzione:
 | Chi la vede | Tutti: data ed esito dell'ultima verifica (non chi l'ha fatta) | Autore del punto (senza sapere chi ha segnalato) e amministratori |
 | Limiti (proposti, RQ-09) | Massimo 1 verifica per utente per punto al giorno | Massimo 1 segnalazione aperta per utente per punto |
 
+**Aggiornamento 2026-10-05 (proposta dello Studente A, RQ-14)**: la verifica si fa con un **tasto Sì/No** ("C'è ancora acqua?"). Lo stato di funzionamento del punto cambia solo dopo **3 risposte uguali**, invece di cambiare a ogni verifica. Da decidere: le 3 risposte devono venire da 3 utenti diversi? Contano solo le più recenti? Cosa si mostra mentre le risposte non sono ancora 3?
+
 **Differenza rispetto all'esempio della consegna**: "Questa fontana non funziona" nella proposta è una **verifica con esito negativo**, perché descrive lo stato attuale e deve aggiornarlo subito. Le segnalazioni restano per i problemi che richiedono una correzione. Alternativa: considerare "non funziona" una segnalazione, lasciando alle verifiche solo le conferme positive, ma lo stato del punto cambierebbe solo dopo l'intervento di qualcuno. Stato: **DA DECIDERE** con gli studenti (RQ-02). Tutta la tabella sopra è una proposta legata a RQ-02.
 
 ---
@@ -377,6 +385,8 @@ Nell'MVP la ricerca coincide con lo spostamento della mappa e la posizione GPS.
 | C. Offline completo con sincronizzazione | Mappe e punti salvati sul dispositivo; punti aggiunti offline inviati al ritorno della rete | Alta | Utile in montagna | Conflitti tra dati, mappe offline vietate dai provider pubblici gratuiti analizzati, molto più codice | Fuori dalla portata del progetto |
 
 Proposta: **A nell'MVP, B in P1, C non prevista**. Stato: DA DECIDERE (D21).
+
+**Aggiornamento 2026-10-05**: lo Studente A vuole la **mappa offline** nelle app per telefono (punto di forza nel pitch). Proposta: dopo l'MVP, mappa della sola Valle d'Aosta salvata sul dispositivo da una fonte che lo permette, più i punti d'acqua salvati; aggiungere punti senza rete resta escluso. La web app per PC resta senza offline.
 
 ---
 
@@ -500,8 +510,8 @@ Priorità: **MVP** = prima versione; **P1** = subito dopo l'MVP; **P2** = utile,
 
 | ID | Categoria | Requisito verificabile |
 | -- | --------- | ---------------------- |
-| RNF-001 | Compatibilità smartphone | Funziona su iPhone (Safari) e Android (Chrome) nelle versioni correnti al momento dei test |
-| RNF-002 | Compatibilità desktop | Funziona su Windows, macOS e Linux con i browser di §15 nelle versioni correnti al momento dei test |
+| RNF-001 | Compatibilità smartphone | (aggiornato 2026-10-05) L'app funziona su iPhone e su Android (Android provato con l'emulatore di Android Studio, D25) nelle versioni correnti al momento dei test |
+| RNF-002 | Compatibilità desktop | (aggiornato 2026-10-05) La web app funziona su Windows, macOS e Linux con i browser di §15 nelle versioni correnti al momento dei test |
 | RNF-003 | Responsive | Utilizzabile da una larghezza minima (proposta: 360 px) fino allo schermo di un computer, senza scorrimento orizzontale |
 | RNF-004 | Prestazioni | Mappa e punti visibili entro un tempo massimo (proposto: 5 s, RQ-09) su connessione mobile 4G, misurato a mano su un telefono reale |
 | RNF-005 | Prestazioni | Con un numero di punti di prova proposto di 2.000 (RQ-09) la mappa si sposta senza blocchi evidenti (prova manuale descritta in `docs/12_TEST.md`) |
@@ -525,13 +535,13 @@ Priorità: **MVP** = prima versione; **P1** = subito dopo l'MVP; **P2** = utile,
 
 | Sistema | Dispositivo | Browser | Stato |
 | ------- | ----------- | ------- | ----- |
-| macOS | MacBook Air Intel dello Studente A (modello e versione macOS DV) | Safari, Chrome, Firefox | Disponibile |
-| iOS | iPhone dello Studente A (modello e versione iOS DV) | Safari (+ installazione, se prevista da D02) | Disponibile |
-| Windows | Computer dello Studente B? | Chrome, Edge, Firefox | **Da confermare** |
-| Linux | Nessun dispositivo noto | Chrome o Firefox | **Da confermare** (es. computer della scuola) |
-| Android | Telefono dello Studente B? | Chrome (+ installazione, se prevista da D02) | **Da confermare** |
+| iOS (app) | iPhone dello Studente A; iPhone 15 Pro Max dello Studente B | App installata dal Mac di A con Xcode | Disponibile (installazione da provare, D24) |
+| Android (app) | Emulatore di Android Studio sul PC dello Studente B (D25) | App | **Da provare** |
+| macOS (web app) | MacBook Air Intel dello Studente A | Safari, Chrome, Firefox | Disponibile |
+| Windows (web app) | PC dello Studente B (Windows 11) | Chrome, Edge, Firefox | Disponibile |
+| Linux (web app) | Nessun dispositivo noto | Chrome o Firefox | **Da confermare** (es. computer della scuola o macchina virtuale) |
 
-La scelta dei browser presuppone un'app utilizzabile tramite browser, come nella proposta D02: se la Fase 2 sceglierà diversamente, questa tabella andrà aggiornata.
+Tabella aggiornata il 2026-10-05 (app per telefoni + web app per PC, D01).
 
 Il simulatore di dimensioni dello schermo del browser serve per il layout, ma **non sostituisce** la prova su un telefono reale (GPS, fotocamera, installazione).
 
@@ -601,9 +611,9 @@ Le proposte **non** sono approvate: ogni RQ resta DA DECIDERE finché gli studen
 | ID | Domanda | Proposta (non approvata) |
 | -- | ------- | -------- |
 | RQ-01 | Modello "acqua potabile" (§5.3; decisione tecnica collegata D13): valori, valore predefinito, etichette | A nell'MVP, C in P2 |
-| RQ-02 | "Non funziona" è verifica o segnalazione? (§9) | Verifica con esito negativo |
+| RQ-02 | "Non funziona" è verifica o segnalazione? (§9) | Verifica con esito negativo (risposta "No" al tasto Sì/No, RQ-14) |
 | RQ-03 | Conferma email obbligatoria? (RF-021) | Nessuna proposta vincolante: dipende dalla possibilità di inviare email (DV, Fase 2) e dalle risposte del docente |
-| RQ-04 | MVP in due tappe (§4.2)? | Sì |
+| RQ-04 | MVP in due tappe (§4.2)? | Risolta il 2026-10-05 dall'ordine D26: mappa e GPS → punti dal database → registrazione e login → aggiunta punto |
 | RQ-05 | Amministratore nell'MVP? (§3.3) | No, salvo richiesta del docente |
 | RQ-06 | Autore visibile pubblicamente? | No nell'MVP; nome visualizzato facoltativo da P2 |
 | RQ-07 | Coordinate esatte dell'area valida (§5.4) | Da fissare nella fase Database |
@@ -612,28 +622,45 @@ Le proposte **non** sono approvate: ogni RQ resta DA DECIDERE finché gli studen
 | RQ-10 | Se un utente elimina l'account, i suoi punti vengono eliminati o restano senza autore? | Da decidere (dipende anche da §7.7) |
 | RQ-11 | Il nome visualizzato serve davvero? | Solo se si decide di mostrare l'autore (RQ-06); altrimenti eliminarlo |
 | RQ-12 | Conservazione interna dell'autore delle verifiche: sempre, per un periodo limitato, o no? | Da decidere |
+| RQ-14 | Verifica con tasto Sì/No (§9): dopo quante risposte uguali cambia lo stato? Da utenti diversi? | 3 risposte uguali (proposta dello Studente A, 2026-10-05); da utenti diversi (da confermare) |
 | RQ-13 | Precisione con cui vengono **mostrate pubblicamente** le date (creazione, ultima modifica, verifiche): data e ora, solo giorno, o forma relativa ("3 giorni fa")? L'ora esatta, insieme all'autore, può rivelare quando una persona era in un luogo | Da decidere (collegata a RQ-06 e RQ-12) |
 
 ---
 
 ## 19. Decisioni che richiedono risposta del docente
 
-1. Una PWA è accettata come "app" per il progetto?
+1. (aggiornata 2026-10-05) Va bene un'app Flutter per iPhone e Android, provata su Android con l'emulatore, più una web app per i PC? Su iPhone, senza account Apple a pagamento, l'app si installa solo sui nostri telefoni e va reinstallata ogni 7 giorni: è accettabile?
 2. Supabase (servizio esterno per account, dati e foto) è accettato?
 3. È richiesta la pubblicazione online con utenti reali, o basta una dimostrazione?
-4. Il repository può essere pubblico? (Cambia le opzioni di pubblicazione gratuite.)
+4. Il repository può essere pubblico? (Cambia le opzioni di pubblicazione gratuite.) Nota 12/10/2026: Max lo indica come pubblico, mentre il diario del 28/09 lo dava reso privato: stato da confermare; nessuna risposta del docente registrata.
 5. Quali regole della scuola valgono per account, email e fotografie? In particolare (dettaglio in §7.7): informativa privacy; consenso o altra base giuridica; età minima degli utenti; autorizzazioni per account, servizi esterni e pubblicazione dei contenuti; gestione delle richieste sui dati personali; durata di conservazione dei dati dopo l'esame.
 6. La scadenza di aprile 2027 è confermata?
 7. È necessario un sistema amministratore / di moderazione? Le foto devono essere controllate prima della pubblicazione?
 8. Alcuni servizi esterni hanno un'età minima per chi crea l'account o accetta i termini (es. un provider di mappe richiede 18 anni): chi deve creare gli account e accettare i termini (studenti, docente, scuola)?
+
+**Risposte riferite dallo Studente A il 2026-10-26** (non c'è una conferma scritta del docente nel repository; la 1 era formulata per Flutter, ora vale per Expo con Expo Go):
+
+| # | Risposta riferita |
+| - | ----------------- |
+| 1 | Sì, è accettabile (app con Expo provata con Expo Go; su iPhone senza account Apple a pagamento non è installabile come app vera). |
+| 2 | Sì, Supabase è accettato. |
+| 3 | Serve la pubblicazione online. |
+| 4 | Il repository può essere pubblico. |
+| 5 | Riferito da A (2026-10-26): foto, account e soprattutto email pubblici, per poter contattare chi carica informazioni false. **Non è chiaro se sia un'indicazione del docente o un'idea degli studenti; email pubbliche = rischio privacy, da verificare con il docente (vedi D29).** |
+| 6 | Sì, la scadenza di aprile 2027 è confermata. |
+| 7 | Scelta nostra; lo Studente A se ne occuperebbe personalmente. Non è detto se serva o no la moderazione delle foto. |
+| 8 | Non c'è un'età minima. |
+
+Desiderio dello Studente A (2026-10-26): poter rendere l'app "ufficiale" a partire da GitHub. Da chiarire cosa si intende (web app pubblicata, file installabile Android da GitHub, store) e quanto costa: vedi limiti in D28 e vincolo V-01 (nessun costo obbligatorio).
 
 ---
 
 ## 20. Vincoli
 
 - Due studenti principianti, su computer diversi, con due conversazioni Claude separate.
-- Studente A: MacBook Air Intel (modello e macOS DV), iPhone (versione iOS DV).
-- Studente B: computer e telefono **da confermare**.
+- Studente A: MacBook Air Intel (identificatore MacBookAir8,2; 8 GB RAM; macOS 14.8.5 Sonoma; verificato il 2026-09-29, vedi `15_TECNOLOGIE.md` §1.3), iPhone (versione iOS DV).
+- Studente B: PC Windows 11 (15,5 GB RAM), iPhone 15 Pro Max (riferiti il 2026-09-30, D15).
+- (2026-10-05) L'app iPhone si può compilare solo sul Mac di A (Xcode massimo 16.2 su macOS 14); Flutter sta riducendo il supporto ai Mac Intel (D24).
 - **V-01 (ex RNF-016) — Costo**: nessun costo obbligatorio per sviluppare, pubblicare e usare l'app. Un'eventuale eccezione va decisa e documentata.
 - Scadenza: aprile 2027 (riferita, da confermare).
 - Licenze e policy dei dati cartografici da rispettare.
@@ -651,9 +678,10 @@ Le proposte **non** sono approvate: ogni RQ resta DA DECIDERE finché gli studen
 | Dati "potabile" sbagliati | Rischio per la salute | Valore predefinito prudente, avviso fisso (§5.3) |
 | Contenuti inappropriati (foto, testi) | Problemi con la scuola | Foto dopo l'MVP; moderazione da definire (§8, §19) |
 | MVP troppo grande | Nessuna versione funzionante in tempo | MVP ridotto; proposta di due tappe (§4.2, RQ-04) |
-| Se si adotta la PWA (D02): su iPhone installazione manuale e dati separati da Safari | Utenti confusi | Istruzioni nella pagina Informazioni; prova pratica |
-| GPS non provabile sul telefono durante lo sviluppo senza HTTPS | Test impossibili | Soluzione da trovare (D12) |
-| Mancanza di dispositivi Windows, Linux o Android per i test | Compatibilità non verificata | Conferma dispositivi Studente B; computer della scuola |
+| (2026-10-05) App iPhone: Mac Intel di A limitato a Xcode 16.2; Flutter abbandona i Mac Intel; senza account a pagamento l'app va reinstallata ogni 7 giorni | App iPhone non installabile o scomoda | Prova pratica subito; piano B: web app anche su iPhone (D24) |
+| GPS nella web app solo in HTTPS | Test della web app più complessi | Pubblicazione in HTTPS (D12); nelle app per telefono il problema non c'è |
+| Mancanza di un telefono Android e di un computer Linux per i test | Compatibilità non verificata | Emulatore di Android Studio sul PC di B (D25, consiglio del docente); browser su un computer Linux della scuola |
+| (2026-10-05) Mappa offline più difficile del previsto | Funzione non pronta | Dopo l'MVP; se non riesce, offline solo per i punti (D21) |
 | Servizi gratuiti che si fermano o vanno in pausa | App non funzionante all'esame | Controllo la settimana prima dell'esame |
 | Conflitti Git tra i due studenti | Lavoro perso | Rami separati, commit piccoli, pull frequenti |
 
@@ -665,7 +693,7 @@ Elenco delle istruzioni del progetto (D17):
 
 Nota: parte della Fase 4 (repository Git, primo commit, push di `main`) è già stata svolta in anticipo.
 
-**Fase corrente**: FASE 1 - Requisiti. Documento completo, in attesa di conferma degli studenti e delle risposte del docente.
+**Fase corrente**: FASE 2 - Tecnologie (Fase 1 in attesa di conferma dello Studente B e del docente). Il 2026-10-05 è stato preparato il pitch dell'idea (`presentazioni/`, versione aggiornata su Google Slides).
 
 ## 23. Cosa dobbiamo sapere spiegare (per ora)
 

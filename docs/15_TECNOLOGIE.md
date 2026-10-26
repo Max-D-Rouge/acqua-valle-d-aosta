@@ -1,6 +1,8 @@
 # 15 - Analisi delle tecnologie (FASE 2)
 
-Stato del documento: FASE 2 - Tecnologie, prima analisi (2026-09-28); aggiunti i dati verificati del computer dello Studente A (2026-09-29). **Nessuna tecnologia è scelta in questo documento.**
+Stato del documento: FASE 2 - Tecnologie, prima analisi (2026-09-28); aggiunti i dati verificati del computer dello Studente A (2026-09-29); **aggiunta la §15 (2026-10-05): Flutter per app iPhone/Android + web app per PC**, direzione indicata dallo Studente A per il pitch. Le §2-§10 descrivono l'analisi precedente (centrata sulla PWA) e restano come storia del confronto. **Nessuna tecnologia è approvata in questo documento.**
+
+Nota 2026-10-12: solo correzioni documentali (V5, V9). Nessuna tecnologia è approvata in questo documento; PWA e Flutter non sono ancora scelte definitive condivise.
 
 ## Come leggere questo documento
 
@@ -28,17 +30,17 @@ Le fonti sono state consultate il 2026-09-28 (alcune durante la Fase 0 nella ste
 | V2 | Progetto scolastico, da spiegare all'esame; ogni scelta va documentata |
 | V3 | Costo obbligatorio: €0 (vincolo V-01 di `01_PROGETTO.md`) |
 | V4 | Sviluppo da due computer diversi, collaborazione con Git/GitHub (D14 APPROVATA) |
-| V5 | Uso su computer (Windows, Linux, macOS) e smartphone (iOS, Android) (D01 APPROVATA) |
+| V5 | Uso su computer (Windows, Linux, macOS) e smartphone (iOS, Android) (D01: APPROVATA nella versione pubblicata del 28/09; DA DECIDERE dal 05/10, vedi `DECISIONI_TECNICHE.md`) |
 | V6 | Mappa interattiva, posizione GPS, registrazione/login, database; immagini dopo l'MVP |
 | V7 | Scadenza prevista: aprile 2027 (riferita, da confermare) |
 | V8 | Rispetto di licenze, condizioni d'uso e privacy (`01_PROGETTO.md` §7) |
-| V9 | Repository GitHub attualmente **privato** (FATTO, dichiarato dallo Studente A in Fase 0) |
+| V9 | Visibilità del repository GitHub: **contraddittoria, da confermare**. Dichiarato privato dallo Studente A in Fase 0 (28/09); il diario dice che era stato reso privato; Max (12/10) e un resoconto di revisione lo indicano pubblico (clone di Mayo senza credenziali). Non verificabile da Claude |
 
 ### 1.2 Dispositivi (FATTO solo ciò che è stato dichiarato)
 
 | Dispositivo | Cosa sappiamo | Cosa manca (DV) |
 | ----------- | ------------- | --------------- |
-| Computer Studente A | **Verificato dallo Studente A il 2026-09-29** (vedi §1.3): identificatore MacBookAir8,2; Intel Core i5 dual-core 1,6 GHz; 8 GB RAM; macOS 14.8.5 (23J423); disco dati 113 GB con **3,9 GB liberi** (97% pieno); amministratore: sì; Git 2.39.5 (Apple); Node.js v26.0.0; npm 11.12.1; Docker 29.8.0 | Anno (vedi incoerenza in §1.3) |
+| Computer Studente A | **Verificato dallo Studente A il 2026-09-29** (vedi §1.3): identificatore MacBookAir8,2; Intel Core i5 dual-core 1,6 GHz; 8 GB RAM; macOS 14.8.5 (23J423); disco dati 113 GB con 3,9 GB liberi al 29/09, circa 15 GB dopo la pulizia (riferito 2026-10-02); amministratore: sì; Git 2.39.5 (Apple); **Node.js v24.21.0 con nvm 0.40.3, npm 11.19.0** (verificato 2026-09-30, D23); Node 26 Homebrew rimosso e Docker Desktop disinstallato | Anno (vedi incoerenza in §1.3) |
 | Telefono Studente A | iPhone | Modello, versione di iOS, browser principale |
 | Computer Studente B | **Riferito dallo Studente B il 2026-09-30**: Windows 11 Pro (build 26200, 64 bit); 15,5 GB RAM; 49 GB liberi su 953 GB; Git 2.54.0; Node.js v24.21.0; npm 11.19.0 | Modello, permessi di amministratore |
 | Telefono Studente B | iPhone 15 Pro Max (riferito 2026-09-30) | Versione di iOS, browser principale |
@@ -56,12 +58,12 @@ Dati rilevati dallo Studente A sul proprio Mac con comandi di sola lettura e rip
 | Processore | Intel Core i5 dual-core 1,6 GHz | — |
 | RAM | 8 GB | Sufficiente per sviluppo web; Docker Desktop richiede minimo 4 GB (FATTO) ma su 8 GB con 2 core è pesante |
 | macOS | 14.8.5 Sonoma | Soddisfa il minimo di Node.js (13.5). Ultima versione installabile su questo modello (FATTO: non compatibile con Sequoia/Tahoe) → niente Xcode 26: conferma il blocco di D03 e dell'alternativa ibrida per iOS |
-| Spazio libero | **3,9 GB su 113 GB (97%)** | **Problema principale.** Lo Studente A riferisce che un'installazione con Homebrew è già fallita per spazio. Obiettivo proposto dallo Studente A: liberare almeno 10–15 GB prima di installare dipendenze |
+| Spazio libero | 3,9 GB su 113 GB (97%) al 29/09 | Problema risolto: disinstallando Docker Desktop (circa 10 GB) lo spazio è salito a 13 GB (verificato con `df`, 2026-09-30); circa 15 GB riferiti il 2026-10-02 |
 | Amministratore | Sì | Può installare software |
 | Git | 2.39.5 (Apple) | Presente |
-| Node.js | v26.0.0 | FATTO: Node 26 è in fase **"Current"** (uscita 5 maggio 2026), non LTS; la documentazione ufficiale indica di usare versioni LTS (oggi 22 e 24) in produzione. Soddisfa il minimo di Vite (20.19+/22.12+). Versione da usare nel progetto: DA DECIDERE (D23) |
-| npm | 11.12.1 | Presente |
-| Docker | 29.8.0 | Presente. Non necessario per le alternative con backend online. Supporto di Docker Desktop su Sonoma 14 dipende da quale sia oggi la versione corrente di macOS (DV). Occupa spazio su disco |
+| Node.js | v26.0.0 (Homebrew) al 29/09 → **v24.21.0 con nvm** dal 30/09 | Node 26 è "Current", non LTS. Allineato a Node 24 LTS come lo Studente B (D23 APPROVATA). Node 26 di Homebrew rimosso (riferito 2026-10-02) |
+| npm | 11.12.1 → **11.19.0** (con Node 24) | Uguale allo Studente B |
+| Docker | 29.8.0 → **disinstallato** (2026-09-30) | Docker Desktop rimosso con lo script ufficiale di disinstallazione; liberati circa 10 GB. Non necessario con backend online (D23) |
 
 
 ---
@@ -257,12 +259,12 @@ Tutti i requisiti GPS di `01_PROGETTO.md` (§6, RF-010, RF-011, RF-038) risultan
 | Strumento | Serve per | Requisiti (FATTO) | Situazione | Esito |
 | --------- | --------- | ----------------- | ---------- | ----- |
 | Browser moderno | Qualsiasi alternativa web | — | Mac A: sì (macOS 14.8.5). B: DV | OK per A |
-| Node.js | Vite, React, qualsiasi progetto web moderno; Expo | Binari macOS da **macOS 13.5**; supporto x64 (Intel) "Tier 2 fino a inizio 2028"; Windows da 10 (FATTO). Vite richiede Node 20.19+ o 22.12+ (FATTO); versioni LTS attuali: 22 e 24 (FATTO) | Mac A: **Node.js v26.0.0 già presente** su macOS 14.8.5 (verificato 2026-09-29); v26 non è LTS. B: **v24.21.0** (riferito 2026-09-30), che è una versione LTS | A: OK (versione da decidere); B: OK |
-| Docker (o alternative compatibili) | **Solo** per eseguire Supabase in locale (FATTO); non serve se si usa il servizio online | Docker Desktop su Mac Intel: "versione corrente e due precedenti" di macOS, 4 GB RAM; gratuito per uso personale/educativo (FATTO) | A: Docker 29.8.0 già presente (verificato); supporto su Sonoma 14 DV; pesante con 8 GB e 2 core. B: DV | NON NECESSARIO per le alternative web con backend online |
+| Node.js | Vite, React, qualsiasi progetto web moderno; Expo | Binari macOS da **macOS 13.5**; supporto x64 (Intel) "Tier 2 fino a inizio 2028"; Windows da 10 (FATTO). Vite richiede Node 20.19+ o 22.12+ (FATTO); versioni LTS attuali: 22 e 24 (FATTO) | Mac A: **v24.21.0 con nvm** (verificato 2026-09-30; prima v26 Homebrew). B: **v24.21.0** (riferito 2026-09-30). Versione LTS uguale per entrambi (D23) | OK |
+| Docker (o alternative compatibili) | **Solo** per eseguire Supabase in locale (FATTO); non serve se si usa il servizio online | Docker Desktop su Mac Intel: "versione corrente e due precedenti" di macOS, 4 GB RAM; gratuito per uso personale/educativo (FATTO) | A: disinstallato il 2026-09-30. B: DV | NON NECESSARIO per le alternative web con backend online |
 | Xcode | Solo app iOS native/ibride | Vedi §2 | Mac A: MacBookAir8,2, macOS massimo Sonoma 14 → Xcode massimo 16.2 (FATTO, Apple) | Blocca l'alternativa 3 e la parte iOS dell'alternativa 4 |
 | Android Studio | Solo app native/ibride Android | DV | DV | Non necessario per le alternative web |
 | Telefoni per i test | Tutte | — | A: iPhone (iOS DV). B: DV. Android: nessuno noto | TEST ANDROID: NON DISPONIBILE |
-| Spazio su disco | Tutte (dipendenze, build) | — | **A: 3,9 GB liberi** (verificato). B: DV | **Da risolvere prima di installare dipendenze** |
+| Spazio su disco | Tutte (dipendenze, build) | — | A: circa 15 GB liberi dopo la pulizia (riferito 2026-10-02). B: 49 GB (riferito) | OK |
 
 ---
 
@@ -341,7 +343,7 @@ Combinazioni analizzate (nessuna scelta):
 
 ## 12. Da verificare (elenco)
 
-- Mac A: anno esatto (identificatore 8,2 = 2019 secondo Apple, riferito 2018); spazio libero dopo la pulizia. (Modello, macOS, RAM, amministratore, Git, Node, npm, Docker: verificati il 2026-09-29.)
+- Mac A: anno esatto (identificatore 8,2 = 2019 secondo Apple, riferito 2018); il PATH contiene ancora `~/.docker/bin`, residuo di Docker (innocuo, da ripulire). (Node, npm, nvm verificati il 2026-09-30.)
 - iPhone A: modello e versione di iOS.
 - Studente B: modello del computer, permessi di amministratore, versione di iOS. (Sistema, RAM, disco, Git, Node, npm, telefono, account GitHub: riferiti il 2026-09-30.)
 - Disponibilità di un telefono Android e di un computer Linux per i test.
@@ -359,7 +361,7 @@ Combinazioni analizzate (nessuna scelta):
 
 ## 13. Decisioni ancora aperte
 
-Vedi `DECISIONI_TECNICHE.md`: D02, D04 (riaperta), D05, D06, D08, D09, D10, D11, D12, D13, D15, D19, D20, D21, D22 (nuova: storage immagini), D23 (nuova: ambiente di sviluppo locale).
+Vedi `DECISIONI_TECNICHE.md` (aggiornato 2026-10-05: D24 Flutter, D25 emulatore Android, D26 ordine dell'MVP; D02 superata). Elenco precedente: D02, D04 (riaperta), D05, D06, D08, D09, D10, D11, D12, D13, D15, D19, D20, D21, D22 (nuova: storage immagini), D23 (nuova: ambiente di sviluppo locale).
 
 ## 14. Fonti ufficiali consultate
 
@@ -372,7 +374,9 @@ Fase 2 (2026-09-28):
 - Docker Desktop su Mac: https://docs.docker.com/desktop/setup/install/mac-install/
 - Apple, compatibilità macOS Sonoma: https://support.apple.com/en-us/105113
 - Apple, identificare i modelli di MacBook Air: https://support.apple.com/en-us/102869 (2026-09-29)
-- Node.js, stato delle versioni: https://nodejs.org/en/about/previous-releases (2026-09-29)
+- Node.js, stato delle versioni: https://nodejs.org/en/about/previous-releases (2026-09-29, ricontrollato 2026-09-30)
+- nvm, README ufficiale: https://github.com/nvm-sh/nvm/blob/master/README.md (2026-09-30)
+- Docker Desktop, disinstallazione: https://docs.docker.com/desktop/uninstall/ (2026-09-30)
 - Node.js piattaforme supportate: https://github.com/nodejs/node/blob/main/BUILDING.md
 - Supabase sviluppo locale: https://supabase.com/docs/guides/local-development/cli/getting-started
 - Supabase billing: https://supabase.com/docs/guides/platform/billing-on-supabase
@@ -381,3 +385,68 @@ Fase 2 (2026-09-28):
 - Netlify - nuovo sito: https://docs.netlify.com/welcome/add-new-site/
 
 Fase 0 (stessa data, elenco completo in `DECISIONI_TECNICHE.md`): MapLibre GL JS e React Native, Expo (versioni, EAS, prezzi), Apple (Xcode, compatibilità macOS, membership), Capacitor, OSMF Tile Policy, OSM copyright, OpenFreeMap (ToS), VersaTiles, MapTiler (prezzi, termini), Stadia Maps, Protomaps, Supabase (prezzi, RLS, API keys, Storage, PostGIS, password, termini), PostGIS ST_DWithin, MDN (Geolocation, PWA, capture), web.dev, WebKit, Vite, vite-plugin-pwa, Node.js release, GitHub Pages, Cloudflare Pages limiti, Netlify prezzi, Vercel Hobby.
+
+
+---
+
+## 15. Aggiornamento 2026-10-05: Flutter per app iPhone/Android e web app per PC
+
+### 15.1 Cosa è cambiato (FATTO: indicazioni dello Studente A)
+- Si vuole un'**app vera** per **iPhone e Android** e una **web app** (sito usato dal browser) per i PC.
+- Tecnologia scelta per il pitch: **Flutter** (D24). Per Android il docente ha consigliato l'**emulatore di Android Studio** (D25).
+
+### 15.2 Cos'è Flutter
+- **Cos'è**: un kit di sviluppo di Google; si scrive il codice una sola volta nel linguaggio **Dart** e Flutter produce l'app iPhone, l'app Android e la web app.
+- **Perché ci serve**: un solo codice per tutte le nostre piattaforme, invece di tre progetti diversi.
+- **Alternativa scartata**: Tauri 2 (interfaccia web + Rust: due linguaggi da imparare). PWA per tutto: sul telefono non è un'app vera (D02).
+
+### 15.3 Dove si compila ogni versione (FATTO, docs.flutter.dev)
+| Versione | Dove si crea | Chi |
+| -------- | ------------ | --- |
+| App iPhone | Solo su un Mac con Xcode | Studente A |
+| App Android | Qualsiasi computer con Android Studio; prova con l'emulatore | Proposta: Studente B (requisiti, vedi 15.5) |
+| Web app per PC | Qualsiasi computer con Flutter e Chrome | Entrambi |
+
+Piattaforme web supportate da Flutter (FATTO): Chrome, Firefox, Edge (ultime 2 versioni), Safari 15.6+.
+
+### 15.4 Problemi per l'iPhone (FATTO, salvo dove indicato)
+- Mac di A: Intel, macOS 14.8.5 → Xcode massimo **16.2** (Xcode 16.3+ richiede macOS 15; developer.apple.com).
+- Flutter: "Future Flutter releases will require Apple Silicon" (nessuna data). Rischio: in futuro il Mac di A potrebbe non bastare.
+- Account Apple gratuito: app solo sui propri dispositivi (max 3), profilo che scade dopo 7 giorni (va reinstallata); pubblicare costa 99 USD/anno.
+- DV: se Xcode 16.2 installa l'app su iPhone con iOS recente.
+- Piano B: usare la web app anche su iPhone.
+
+### 15.5 Android con l'emulatore (FATTO, developer.android.com)
+- Requisiti consigliati dell'emulatore: 16 GB RAM, 16 GB di disco, Windows 10+ o macOS 12+ a 64 bit; con meno "potrebbe funzionare, ma non in modo fluido".
+- Mac di A: 8 GB RAM, circa 15 GB liberi → sotto i requisiti. PC di B: 15,5 GB RAM, 49 GB liberi → vicino ai requisiti.
+- Nell'emulatore la posizione GPS si imposta a mano.
+
+### 15.6 Mappa e offline
+- Libreria proposta: `flutter_map` (funziona su tutte le piattaforme di Flutter). La sua documentazione avverte che i tile pubblici OSM non sono liberi per tutti e permette tile da altri server o dal dispositivo (FATTO).
+- Regole OSM (FATTO): server pagati da donazioni, nessuna garanzia, vietati prefetch e funzioni "scarica per offline", blocco possibile senza preavviso.
+- Mappa offline (D21): proposta di usare un file con la mappa della sola Valle d'Aosta preso da una fonte che lo consente (es. estratto PMTiles; DV come mostrarlo in `flutter_map`).
+
+### 15.7 Cosa resta valido dell'analisi precedente
+- Backend: Supabase resta il candidato principale (DV: pacchetto ufficiale per Flutter).
+- Coordinate `latitude` + `longitude` (D11), segreti (D18), Git (D14).
+- Hosting HTTPS (D12): serve solo per la web app.
+
+### 15.8 Fonti (2026-10-05)
+- https://docs.flutter.dev/reference/supported-platforms
+- https://docs.flutter.dev/install/manual
+- https://github.com/flutter/flutter/issues/188328
+- https://docs.fleaflet.dev/
+- https://developer.apple.com/xcode/system-requirements
+- https://developer.apple.com/support/compare-memberships/
+- https://developer.android.com/studio/run/emulator
+- https://operations.osmfoundation.org/policies/tiles/
+
+## 16. Aggiornamento 2026-10-23: Expo al posto di Flutter
+
+- La §15 (Flutter) è conservata come storico: Flutter è stato abbandonato su indicazione dello Studente A il 2026-10-23 (D28). Approvata dallo Studente A il 2026-10-26; **la conferma di Mayo non è registrata**. Il docente, secondo quanto riferito da A, ha risposto di sì alla domanda 1 del §19 di `docs/01_PROGETTO.md` (app Expo con Expo Go accettabile).
+- Tecnologia in uso, provvisoria: React Native + Expo SDK 58, TypeScript, Expo Router.
+- Fatti (FATTO, documentazione ufficiale, 2026-10-19): Expo SDK 58 richiede React Native 0.88, Node.js 22.13+ e Xcode 26.4+ per le build iOS locali; Expo Go non richiede Xcode e include `react-native-webview` e `expo-location`; le build per l'App Store richiedono l'Apple Developer Program (99 USD/anno), quelle per il simulatore iOS no; i tile pubblici OpenStreetMap vietano download offline e prefetch e non garantiscono il servizio; piano gratuito EAS nel 2023: 30 build al mese, di cui 15 iOS (dato del 2023, da ricontrollare).
+- Mappa: MapLibre GL JS 4.7.1 in una WebView, con lo stile OpenFreeMap (come nel prototipo web). MapLibre React Native non è usato perché non funziona in Expo Go.
+- Backend: Supabase (PostgreSQL); schema in `database/01_punti.sql`; lettura pubblica protetta da RLS e nessuna scrittura per ora.
+- Non verificato: Android, Windows, mappa offline, build installabili su iPhone senza account Apple a pagamento, limiti e pausa dei progetti Supabase gratuiti.
+- Fonti: https://docs.expo.dev/versions/latest/ , https://expo.dev/blog/expo-go-vs-development-builds , https://docs.expo.dev/build/setup/ , https://operations.osmfoundation.org/policies/tiles/

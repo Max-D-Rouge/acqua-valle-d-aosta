@@ -421,3 +421,256 @@ Dati dell'iPhone di A; tutti i dati dello Studente B.
 - Problema: un `git status` eseguito da Claude ha lasciato di nuovo `.git/index.lock`. Soluzione: permesso di eliminazione concesso da Max, file rimosso. Regola per il futuro: Claude non esegue più comandi Git sul Mac di A, li esegue Max.
 - File modificati: `DECISIONI_TECNICHE.md` (D15), `docs/15_TECNOLOGIE.md` (§1.2, §8, §12), `DIARIO_SVILUPPO.md`.
 - Test / commit: nessuno.
+
+---
+
+## 2026-09-30 / 2026-10-02 - FASE 2: allineamento dell'ambiente Node.js (D23)
+
+- Sviluppatore: Studente A (Max). Studente B: non coinvolto (aveva già Node 24.21.0).
+- Obiettivo: usare la stessa versione principale di Node.js sui due computer, senza usare Homebrew per Node.
+- Verifica iniziale (output del Terminale di A): Node v26.0.0, npm 11.12.1, Mac Intel `x86_64`, macOS 14.8.5, shell zsh; Node 26 installato con **Homebrew** (`/usr/local/bin/node` -> `../Cellar/node/26.0.0/bin/node`); nessun version manager; 2,6 GB liberi.
+- Alternative valutate: tenere Node 26; Node 24 con Homebrew (escluso); pacchetto ufficiale nodejs.org; nvm. Scelto **nvm** (vedi D23).
+
+### Attività svolte
+1. Disinstallato Docker Desktop con lo script ufficiale (`/Applications/Docker.app/Contents/MacOS/uninstall`): spazio libero da 2,6 GB a 13 GB.
+2. Creato `~/.zshrc` (non esisteva) e installato nvm con lo script ufficiale: versione **0.40.3**.
+3. `nvm install 24`: scaricato `node-v24.21.0-darwin-x64.tar.xz` da nodejs.org, checksum verificato; nvm ha creato da solo `default -> 24`.
+4. Rimosso Node 26 di Homebrew (riferito dallo Studente A il 2026-10-02, output non visto da Claude).
+
+### Problemi e soluzioni
+- Dopo l'installazione `nvm` non veniva trovato: la finestra del Terminale aveva letto `~/.zshrc` quando era ancora vuoto. Soluzione: `source ~/.zshrc`, poi verifica in un Terminale riaperto.
+- Lo script di nvm ha segnalato un modulo globale (`@openai/codex`) installato nel Node di Homebrew: non serve al progetto, lo Studente A ha deciso che può essere perso.
+
+### Test effettuati (output visto)
+In un Terminale nuovo: `node -v` = v24.21.0; `npm -v` = 11.19.0; `which node` = `~/.nvm/versions/node/v24.21.0/bin/node`; `nvm current` = v24.21.0; `nvm alias default` = `default -> 24 (-> v24.21.0)`.
+
+### Risultato
+A e B usano Node 24.21.0 e npm 11.19.0. D23 APPROVATA.
+
+### File
+- Modificati: `DECISIONI_TECNICHE.md` (D23), `docs/15_TECNOLOGIE.md` (§1.2, §1.3, §8, §12, fonti), `README.md`, `DIARIO_SVILUPPO.md`. Nessun file del progetto creato; le modifiche al computer (nvm, `~/.zshrc`) sono fuori dal repository.
+
+### Commit
+Nessuno (da fare a cura di Max).
+
+### Cosa abbiamo imparato
+- Differenza tra versione LTS e "Current".
+- Un version manager installa più versioni di Node e sceglie quale usare tramite il PATH.
+- `~/.zshrc` viene letto solo all'apertura del Terminale.
+
+### Da fare
+- Ripulire il residuo `~/.docker/bin` dal PATH.
+- Push del ramo `dev-studente-B` (non ancora su GitHub).
+- Valutare un file `.nvmrc` nel repository.
+
+---
+
+## 2026-10-05 - FASE 2: pitch dell'idea e nuova direzione tecnica
+
+- Sviluppatore: Studente A (Max), con Claude. Studente B (Mayo): non coinvolto, da informare (`RESOCONTO_PER_STUDENTE_B.md`).
+- Obiettivo: preparare il pitch dell'idea per il corso (7 slide, 8 minuti, consegna su Google Classroom) e aggiornare i documenti con le decisioni emerse.
+
+### Attività svolte
+1. Creata la presentazione `presentazioni/AcquaVDA_Pitch.pptx` dai documenti del progetto (7 slide con note del relatore e divisione tra i due studenti).
+2. Max l'ha caricata su Google Slides ("AcquaVDA_Pitch", condivisa con l'account della scuola) e ha scritto note tra parentesi nelle slide; Claude le ha applicate direttamente su Google Slides.
+3. Aggiunto il logo (goccia con montagna) disegnato con le forme di Slides.
+4. Ricerca su documentazione ufficiale: Flutter (piattaforme, Mac Intel), Xcode, account Apple gratuito, emulatore Android, policy dei tile OSM, flutter_map.
+
+### Decisioni e indicazioni dello Studente A
+- App vera per **iPhone e Android**, **web app** per i PC (D01). Durante la giornata era stata considerata anche l'ipotesi "Windows, Linux, iOS come app", superata.
+- Tecnologia: **Flutter** (D24, DA DECIDERE fino alla prova pratica). Scartate PWA come soluzione unica (D02) e Tauri 2.
+- Test Android con l'**emulatore di Android Studio**, consigliato dal docente (D25).
+- Ordine dell'MVP: mappa e GPS → punti dal database → registrazione e login → aggiunta punto (D26).
+- Funzioni: **verifica con tasto Sì/No** (stato cambia dopo 3 risposte uguali, RQ-14); **mappa offline** dopo l'MVP (D21).
+- GPS: non salvato, tranne quando si aggiunge un punto (già nei requisiti, §6).
+
+### Problemi emersi
+- Il Mac di A (Intel, macOS 14) arriva solo a Xcode 16.2; Flutter sta abbandonando i Mac Intel; senza account Apple a pagamento l'app iPhone va reinstallata ogni 7 giorni.
+- L'emulatore Android richiede 16 GB di RAM: il Mac di A (8 GB) non basta, il PC di B è vicino ai requisiti.
+- Claude ha eseguito sul Mac di A comandi Git **di sola lettura** (`git status`, `git log`, `git branch`), contro la regola del 2026-09-30; nessun `index.lock` rimasto (controllato). La regola resta: i comandi Git li esegue Max.
+
+### File
+- Creati: `presentazioni/AcquaVDA_Pitch.pptx`.
+- Modificati: `DECISIONI_TECNICHE.md` (D01-D06, D12, D15, D20, D21; nuove D24, D25, D26; fonti), `docs/01_PROGETTO.md` (revisione 4), `docs/15_TECNOLOGIE.md` (§15), `README.md`, `CHANGELOG.md`, `RESOCONTO_PER_STUDENTE_B.md` (riscritto), `DIARIO_SVILUPPO.md`.
+
+### Test / commit
+- Test: nessuno (non esiste codice). Presentazione controllata esportandola in PDF.
+- Commit: nessuno (da fare a cura di Max).
+
+### Cosa abbiamo imparato
+- Differenza tra app nativa, web app e PWA.
+- Perché un'app iPhone richiede un Mac con Xcode e cosa permette un account Apple gratuito.
+- Cos'è un emulatore e quali risorse richiede.
+- Perché i server dei tile OSM non si possono usare liberamente, soprattutto per l'offline.
+
+### Attività successive
+1. Commit e push (Max), poi Mayo legge il resoconto e conferma o contesta le decisioni.
+2. Prova pratica: Flutter sul Mac di A (`flutter doctor`, app di prova su iPhone); Flutter + Android Studio sul PC di B (emulatore e web).
+3. Aggiornare le domande al docente (§19) e consegnare il pitch.
+
+---
+
+## 2026-10-05 (sera) - FASE 2: risposta dello Studente B al resoconto
+
+- Sviluppatori: Studente B (Mayo) ha letto il resoconto e risposto tramite Max; modifiche fatte dalla chat di A.
+- Punti di Mayo: non conferma ancora Flutter; D01 va confermata insieme e chiesta al docente; dubbio sul tempo per imparare Dart e sull'efficacia del piano B; chiede di sospendere la modifica di Node 26; "anche offline" nella slide 3 è fuorviante; comando Git del resoconto sbagliato; controllerà i concorrenti della slide 4 e disco/RAM per l'emulatore.
+- Modifiche: D01 riportata a DA DECIDERE; D24 con proposta di prova a tempo fino a fine novembre e ritorno alla PWA se fallisce; nota in D23 (Node 26 già rimosso il 02/10, nulla da sospendere); resoconto corretto (punto 5: `git fetch origin` + `git merge origin/dev-studente-A`; nuova sezione 10); slide 3 e 4 su Google Slides: offline indicato come pianificato.
+- Errore riconosciuto: il comando `git pull` nel resoconto non avrebbe portato i commit di `dev-studente-A` (segnalato da Mayo).
+- Test / commit: nessuno.
+
+
+
+---
+
+## 2026-10-07 - Prototipo web: gruppi di punti e icone disegnate (stile ispirato a HydrantMap)
+
+- Sviluppatore: Studente A (Max), con la chat Cowork (non la chat di Code che ha creato il prototipo).
+- Fase: lavoro sul prototipo web (piano B della D24), fuori dall'ordine delle fasi; nessuna modifica all'app vera.
+- Obiettivo: prendere spunto visivo da HydrantMap (hydrantmap.org); da lontano raggruppare i punti in cerchi con il numero, grandi in base a quanti punti contengono; al posto dei pin uguali, icone disegnate per tipo (fontana, fontanella, sorgente, punto in una struttura).
+
+### Attività svolte
+1. Logo: proposte in `design/loghi/` (varie versioni); scelto lo stile "mappa" (`design/loghi/stile_mappa/`), usato come icona del prototipo.
+2. `app.js`: sorgente "punti" con `cluster: true` (raggio 55 px, fino allo zoom 13); livelli `gruppi-alone`, `gruppi`, `gruppi-num`; clic su un gruppo = zoom finché si divide.
+3. `app.js`: icone disegnate con canvas per ogni tipo (30 immagini: 5 tipi x 3 potabilità x funzionante/non funzionante). Bordo colorato + simbolo 💧/🚫/❓ per la potabilità (RF-004: non solo colore), ✖ rosso se non funzionante.
+4. `style.css`, `index.html`, `manifest.webmanifest`: colore principale blu scuro #18395a, pulsanti quadrati arrotondati.
+5. `sw.js`: cache portata a `acquavda-v8` per far caricare i file nuovi.
+
+### Problemi e soluzioni
+- I numeri dei gruppi scritti come testo della mappa usano i font scaricati dal server di OpenFreeMap. Nel test, con i font non raggiungibili, i riquadri della mappa con un gruppo non venivano caricati e **i gruppi sparivano**. Soluzione: il numero è un'immagine disegnata dall'app (evento `styleimagemissing`), quindi funziona anche offline.
+
+### Test
+- `node test.mjs`: tutti i test passati.
+- Prova nel browser (Chromium automatico) con la mappa di base sostituita da uno sfondo neutro, perché OpenFreeMap non era raggiungibile dall'ambiente di prova: gruppi con numeri visibili, cerchi più grandi con più punti, clic su un gruppo che zooma (8.6 → 9.3) e lo divide, icone corrette.
+- Da fare: prova sul Mac con la mappa vera, in 2D e in 3D.
+
+### File
+- Modificati: `prototipo-web/app.js`, `style.css`, `index.html`, `manifest.webmanifest`, `sw.js`, `icon.svg` (sostituito dal logo nuovo).
+- Creati: `design/loghi/...`, `NOTA_PER_CHAT_CODE.md`.
+
+### Cosa abbiamo imparato
+- Cos'è il **clustering**: raggruppare i punti vicini quando la mappa è lontana, per non coprirla di icone.
+- Un'icona sulla mappa è un'immagine registrata con `map.addImage` e scelta per ogni punto con `icon-image`.
+
+### Attività successive
+1. Max prova il prototipo (Cmd+Shift+R per aggiornare il service worker).
+2. Mostrare le modifiche a Mayo e decidere se tenerle (D27).
+3. Commit (a cura di Max).
+
+
+---
+
+## 2026-10-12 - FASE 2: audit del repository e correzioni documentali
+
+- Sviluppatore: Studente A (Max), con la chat Cowork (Claude).
+- Fase: 2 (Tecnologie), lavoro di coordinamento; nessuna fase avviata o chiusa.
+- Obiettivo: ricostruire lo stato reale del lavoro locale, confrontarlo con la versione pubblicata (commit `bb9b849`) e correggere nei documenti le informazioni obsolete o contraddittorie, senza cambiare decisioni e senza pubblicare nulla.
+
+### Attività svolte
+1. Audit in sola lettura di branch, commit, file modificati e nuovi, documenti, prototipo e test (comandi Git di sola lettura eseguiti da Claude su autorizzazione di Max; nessun file `.lock` lasciato).
+2. Backup completo del progetto in `~/Desktop/ProgettoFontane_backup_2026-10-12` (fuori dal repository; 124 file, 4,1 MB; confronto con `diff -rq` senza differenze).
+3. Correzioni documentali: stato dei rami (`origin/dev-studente-A` e `origin/dev-studente-B` puntano entrambi a `bb9b849`, verificato il 12/10/2026 su indicazione di Max), precisazione di chi ha approvato ogni decisione, aggiunta di D27 alla tabella riassuntiva, nuova sezione delle differenze rispetto alla versione pubblicata, stato del prototipo (esiste solo in locale), PWA e Flutter indicate come non ancora scelte definitive condivise, percorso personale rimosso da `CLAUDE.md`.
+4. Nessuna decisione tecnica è stata cambiata; il codice del prototipo e i file al suo interno non sono stati toccati.
+
+### Problemi e contraddizioni ancora aperte
+- Visibilità del repository: il diario del 28/09 dice che Max lo ha reso privato; l'incarico del 12/10 e un resoconto di revisione lo indicano pubblico. Da confermare su GitHub (Claude non ha potuto aprirlo).
+- Una versione precedente di `RESOCONTO_PER_STUDENTE_B.md` (12/10) affermava che `dev-studente-B` non risultava su GitHub: era sbagliato, basato su una copia locale non aggiornata. Corretto.
+- La voce di diario del 28/09 elenca D04 tra le decisioni APPROVATE, mentre la tabella la dà DA DECIDERE: lo stato valido è DA DECIDERE. La voce storica non è stata riscritta.
+- Le voci storiche del diario (28/09 e 30/09) citano ancora il repository come privato, Node 26, Docker e 3,9 GB liberi: sono la storia di quei giorni.
+- Nessuna conferma scritta di Mayo o del docente è registrata per D01, D23, D24, D25, D26, D27 e per i requisiti.
+- `CLAUDE.md` indica `dev-studente-A` come ramo di lavoro: vale per Max, non per Mayo (da decidere).
+
+### Test effettuati
+- Riferiti da Max (12/10, sul suo Mac): `node prototipo-web/test.mjs` superato; `git diff --check` senza output.
+- Eseguiti da Claude (12/10, nel proprio ambiente, Node 22 e non Node 24): `node prototipo-web/test.mjs` superato. I test non provano il funzionamento della mappa nel browser.
+
+### File
+- Modificati: `README.md`, `CHANGELOG.md`, `DECISIONI_TECNICHE.md`, `docs/01_PROGETTO.md`, `docs/15_TECNOLOGIE.md`, `RESOCONTO_PER_STUDENTE_B.md`, `CLAUDE.md` (solo il percorso personale), `DIARIO_SVILUPPO.md`.
+- Creato fuori dal repository: la cartella di backup indicata sopra.
+
+### Cosa abbiamo imparato
+- "APPROVATA" nei nostri documenti vuol dire approvata da A: una decisione è condivisa solo con la conferma scritta di B (e, dove serve, del docente).
+
+### Attività successive
+1. Max decide cosa includere nel commit e quali file di lavoro escludere (password di prova, `.claude/`, `design/`, `presentazioni/`, nota temporanea, immagini di test).
+2. Max esegue commit e push (non fatti in questa sessione).
+3. Mayo aggiorna il proprio ramo e risponde alle domande del resoconto.
+
+---
+
+## 2026-10-23 - FASE 5: creato il progetto Expo e prima mappa sul telefono
+
+- Sviluppatore: Studente A (Max), con la chat Cowork (Claude).
+- Fase: 5 (Creazione progetto), avviata in modo anticipato su richiesta di Max: le Fasi 2-4 non sono state chiuse con conferma di Mayo e del docente.
+- Obiettivo: iniziare subito l'app con React Native + Expo e vedere una mappa con punti di prova su un telefono vero.
+
+### Indicazioni di Max (non ancora confermate da altri)
+- Flutter viene abbandonato; l'app si fa con React Native + Expo. **Mayo non ha confermato e il docente non è stato consultato**: nel repository non esiste nessuna approvazione. D24 (Flutter) e D03 (Expo, BLOCCATA) in `DECISIONI_TECNICHE.md` **non sono ancora stati aggiornati** e quindi contraddicono questa voce.
+- Il blocco di D03 (Xcode 26.4+ non installabile sul Mac Intel di A; build iPhone nel cloud con Apple Developer a 99 $) **non è stato risolto**: è solo aggirato, sviluppando con Expo Go. Questo percorso non permette (da verificare) la mappa offline né una app pubblicabile sull'App Store senza account a pagamento.
+
+### Attività svolte
+1. Lettura in sola lettura del repository e dei documenti sulle decisioni.
+2. Creato il progetto in `app-mobile/` con `npx create-expo-app@latest app-mobile` (SDK 58, TypeScript, Expo Router, template predefinito). `npm install` ha richiesto circa 28 minuti.
+3. Installato `react-native-webview` con `npx expo install react-native-webview` (inclusa in Expo Go, secondo la documentazione SDK 58).
+4. Scritta una schermata con la mappa: MapLibre GL JS (4.7.1) con stile OpenFreeMap dentro una WebView, 14 punti di esempio presi dal prototipo web, scheda con i dati del punto toccato.
+
+### Problemi e soluzioni
+- Expo Go e la CLI richiedono un account Expo (gratuito): errore "You need to be signed in". Soluzione: account su expo.dev, accesso in Expo Go e `npx expo login` sul Mac.
+- `npm install` segnala 19 vulnerabilità "high" nelle dipendenze del template. Non risolte (`npm audit fix --force` non va usato alla cieca). Da riguardare nella fase di sicurezza.
+
+### Test effettuati
+- Riferito da Max (23/10): la mappa con i punti si vede e funziona su iPhone con Expo Go.
+- NON fatti: Android, Windows (Mayo), `npx tsc --noEmit`, `npx expo lint`, Expo Go senza internet.
+
+### File
+- Creati: `app-mobile/` (progetto generato), `app-mobile/src/data/punti.ts`, `app-mobile/src/components/mappa.tsx`.
+- Modificati: `app-mobile/src/app/index.tsx` (sostituita la schermata di benvenuto del template).
+- Nessun commit né push fatto.
+
+### Cosa abbiamo imparato
+- Expo Go permette di provare l'app su iPhone senza Xcode, ma usa solo il codice nativo che include.
+- Una WebView permette di riusare MapLibre GL JS del prototipo dentro l'app.
+
+### Attività successive
+1. Max avvisa Mayo e gli chiede di confermare Expo; Mayo prova `app-mobile` sul suo PC e sul suo iPhone.
+2. Aggiornare `DECISIONI_TECNICHE.md`, `README.md` e `docs/15_TECNOLOGIE.md` (Flutter superato, D03 riaperta).
+3. `tsc` e `lint`, poi commit sul ramo `dev-studente-A` solo con autorizzazione di Max.
+4. Prossima funzione: posizione GPS, poi punti dal database.
+
+---
+
+## 2026-10-26 - FASE 4: guida Git per lavorare in due su Expo
+
+- Sviluppatore: Studente A (Max), con la chat Cowork (Claude).
+- Fase: 4 (Git/GitHub), applicata al progetto Expo di `app-mobile/`.
+- Obiettivo: rispondere alla domanda "si può lavorare in due su Expo?" e preparare la procedura per Max (Mac) e Mayo (Windows).
+
+### Attività svolte
+1. Lettura in sola lettura del repository: ramo corrente `dev-studente-A`; rami `main`, `dev-studente-A`, `dev-studente-B` presenti in locale e su `origin`; `app-mobile/` e altre cartelle risultano non ancora committate.
+2. Scritta la guida `docs/11_GIT.md` (procedura per Max, procedura per Mayo, uso quotidiano, conflitti, segreti, domande d'esame).
+3. Creato `app-mobile/.env.example` (solo i nomi delle variabili, senza valori). Verificato con Git che `app-mobile/.env` è ignorato e `app-mobile/.env.example` no.
+
+### File
+- Creati: `docs/11_GIT.md`, `app-mobile/.env.example`.
+- Modificati: `DIARIO_SVILUPPO.md` (questa voce).
+- Nessun commit né push fatto.
+
+### Problemi
+- `app-mobile/` esiste solo sul Mac di Max: finché non c'è commit e push Mayo non può provarlo.
+- Expo al posto di Flutter non è confermato da Mayo né dal docente (vedi voce del 2026-10-23); D03 e D24 non sono ancora aggiornate.
+
+### Test effettuati
+- Nessuna prova dei comandi Git descritti nella guida da parte di Max o Mayo. La tabella "Verifica" in `docs/11_GIT.md` è vuota e va compilata dopo la prova.
+
+### Attività successive
+1. Max: commit e push di `app-mobile` seguendo il §5 di `docs/11_GIT.md`, solo quando decide di farlo.
+2. Mayo: provare il §6 su Windows e annotare l'esito.
+3. Aggiornare D03/D24, `README.md` e `docs/15_TECNOLOGIE.md` dopo la conferma di Mayo.
+
+### Aggiornamento (2026-10-26, 14:40)
+- Max ha detto: "useremo Expo e non Flutter". Registrato in D28 come ribadito dallo Studente A; conferma di Mayo e del docente non registrata, quindi D28 resta PROPOSTA.
+- Max ha riferito le risposte del docente alle domande di `docs/01_PROGETTO.md` §19 (1 sì, 2 sì, 3 pubblicazione online, 4 repository pubblico, 5 nessuna risposta, 6 sì, 7 scelta nostra, 8 nessuna età minima). Registrate in §19 e D19 come riferite da A; la domanda 5 resta aperta.
+- Max sulla domanda 5: foto, account e soprattutto email pubblici; distribuzione da GitHub di web app e file Android, iPhone con la web app, esame mostrato con Xcode. Registrato come D29 (PROPOSTA) con i punti da verificare: mappa in WebView sul web, limiti EAS Free, Xcode non installabile sul Mac Intel (D28), rischio privacy delle email pubbliche.
+- Max (14:52) sceglie: nome utente pubblico + pulsante "contatta/segnala" che inoltra il messaggio senza mostrare l'email. Per l'esame sta valutando un hackintosh per Xcode (non verificato, vedi note in D29). Vuole l'app scaricabile da chiunque: registrato in D29 cosa è gratis e cosa no.
+- Max (14:53): "io decido tutto, non serve la conferma di Mayo". D28 e D29 passano ad APPROVATA da A; la conferma di B resta non registrata e non richiesta da A. README aggiornato di conseguenza.
+- Max (14:56): il pulsante "contatta/segnala" basta per la privacy; registrato in D29. Restano da fare, nelle fasi del database e dell'autenticazione, l'informativa privacy e le regole RLS sulle email.
+- Push di `dev-studente-A` verificato su GitHub: `4c44a91`. Mayo, al 14:28, era ancora a `bb9b849`, senza `app-mobile`, `node_modules` né `.env`.
