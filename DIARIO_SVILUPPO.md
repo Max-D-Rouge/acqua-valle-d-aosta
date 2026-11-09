@@ -674,3 +674,104 @@ Nessuno (da fare a cura di Max).
 - Max (14:53): "io decido tutto, non serve la conferma di Mayo". D28 e D29 passano ad APPROVATA da A; la conferma di B resta non registrata e non richiesta da A. README aggiornato di conseguenza.
 - Max (14:56): il pulsante "contatta/segnala" basta per la privacy; registrato in D29. Restano da fare, nelle fasi del database e dell'autenticazione, l'informativa privacy e le regole RLS sulle email.
 - Push di `dev-studente-A` verificato su GitHub: `4c44a91`. Mayo, al 14:28, era ancora a `bb9b849`, senza `app-mobile`, `node_modules` né `.env`.
+
+---
+
+## 2026-10-28 - Prima prova di Mayo: `npm install` fallisce
+
+- Sviluppatore: Studente B (Mayo) sul PC Windows; registrato da Studente A (Max) con Claude.
+- Fatto da Mayo (riferito): `git fetch` e `git merge origin/dev-studente-A`, quindi ha `app-mobile`; creato `.env` da `.env.example` e aperto il file per scrivere i due valori; ha Expo Go e un account Expo sull'iPhone.
+- Problema: `npm install` fallito due volte con `ECONNRESET` e avvisi `EPERM`; `npx expo start` non parte perché `expo` non è installato. Dettagli e analisi in `docs/13_PROBLEMI_E_SOLUZIONI.md` (PS-001).
+- Verificato da Claude sul repository: lockfile presente su GitHub, 577 pacchetti dal registro ufficiale npm, nessun `.npmrc`.
+- Test: nessuno riuscito; l'app non è stata ancora avviata sul PC di Mayo.
+- Prossimo passo: pulizia di `node_modules` e `npm ci` come descritto in PS-001; Mayo riferisce l'esito.
+
+
+---
+
+## 2026-11-06 - FASE 8: registrazione, login e logout (primo codice)
+
+- Sviluppatore: Studente A (Max), con la chat Cowork (Claude).
+- Fase: 8 (Autenticazione). Max ha chiesto di proseguire lo sviluppo senza attendere conferme di Mayo o del docente.
+- Obiettivo: permettere registrazione, accesso e uscita con email e password tramite Supabase Auth.
+
+### Stato trovato all'inizio
+- Esistono: mappa (MapLibre in WebView), pulsante "Dove sono" (GPS, posizione solo in memoria), punti letti da Supabase. Ramo `dev-studente-A` a `cc3bb7c`.
+- `npx tsc --noEmit` (eseguito da Claude in un ambiente Linux con Node 22) segnala 2 errori già presenti prima di questa sessione: `src/components/mappa.tsx` (tipi di `WebView`) e `src/components/app-tabs.web.tsx`. Non sono stati corretti né verificati sul Mac.
+
+### Attività svolte
+1. Installato `@react-native-async-storage/async-storage@2.2.0` (versione indicata da Expo SDK 58) per salvare la sessione sul telefono.
+2. `src/lib/supabase.ts`: sessione salvata (`persistSession: true`) e rinnovo automatico del token.
+3. Nuovo hook `src/hooks/use-sessione.ts` (chi è collegato).
+4. Nuova schermata `src/app/profilo.tsx` (accesso / registrazione / email e Esci); sostituisce la demo `explore.tsx` del template, eliminata.
+5. Tab "Explore" rinominata "Profilo" in `app-tabs.tsx` e `app-tabs.web.tsx`.
+
+### File
+- Creati: `src/hooks/use-sessione.ts`, `src/app/profilo.tsx`.
+- Modificati: `src/lib/supabase.ts`, `src/components/app-tabs.tsx`, `src/components/app-tabs.web.tsx`, `package.json`, `package-lock.json`.
+- Eliminato: `src/app/explore.tsx`.
+
+### Da sapere
+- `package-lock.json` è stato rigenerato con npm 10 su Linux: oltre al nuovo pacchetto sono spariti alcuni campi `"libc"`. Per un lockfile pulito, rieseguire `npm install` sul Mac.
+- Supabase: se "Confirm email" è attivo (Authentication > Providers > Email), dopo la registrazione serve cliccare il link ricevuto per email prima di accedere. La scelta è di Max.
+- Nome utente pubblico (D29) e tabella profili NON ancora fatti.
+
+### Test
+- NESSUN test eseguito su telefono. Da fare: `cd app-mobile && npm install && npx expo start --clear`, registrare un utente, chiudere e riaprire l'app (deve restare collegato), uscire.
+
+### Attività successive
+1. Max prova il login su iPhone; poi `docs/07_AUTENTICAZIONE.md` e commit (solo su richiesta di Max).
+2. Poi: dettaglio punto migliorato e aggiunta punto (scrittura su `punti` con regole RLS per utenti collegati).
+
+### Aggiornamento (2026-11-06, 12:25) - errore `window is not defined` su `expo start`
+- Max ha avviato `npx expo start` sul Mac (Node 24.21.0): crash `ReferenceError: window is not defined` da `SupabaseAuthClient` / AsyncStorage, durante il rendering web sul server (`"output": "server"` in `app.json`).
+- Causa: sul server Node non esiste `window` e AsyncStorage lo usa. Correzione: in `src/lib/supabase.ts` un archivio che non fa nulla quando `window` non esiste. Su telefono e nel browser non cambia niente.
+- Test dopo la correzione: `tsc` senza nuovi errori (eseguito da Claude); riavvio di `expo start` da rifare da parte di Max.
+
+### Aggiornamento (2026-11-06, 12:35) - prima prova su iPhone
+- Riferito da Max con foto: su iPhone (Expo Go) la mappa con i punti da Supabase e il pulsante "Dove sono" si vedono; la tab "Profilo" con il modulo di accesso si vede.
+- Problema: con l'iPhone in modo scuro, nel Profilo titolo e testi erano illeggibili (blu scuro su nero). Correzione: sfondo chiaro fisso e colore dei suggerimenti nei campi in `src/app/profilo.tsx` (da riprovare).
+- Registrazione, login, permanenza della sessione e logout: ANCORA NON provati.
+- Nel browser la mappa non funziona (WebView non supporta il web): limite noto, da affrontare a parte (web app, D29).
+- (12:40) Tasti zoom della mappa: in alto a destra erano coperti dall'ingranaggio di Expo Go (menu sviluppatore, solo in sviluppo). Spostati più in basso con una regola CSS in `src/components/mappa.tsx` (`.maplibregl-ctrl-top-right { top: 120px; }`). Da verificare sul telefono.
+- (12:37) Annullato lo spostamento dei tasti zoom: Max preferisce lasciarli dov'erano (il pulsante che li copre è solo l'ingranaggio di Expo Go, presente in sviluppo). `mappa.tsx` è tornato com'era.
+- (12:52) Test su iPhone riferito da Max: registrazione e login funzionano e l'app ricorda l'accesso dopo la chiusura. Logout non citato: non registrato come verificato. Conferma email Supabase: non chiarito se attiva.
+- (12:52) Su richiesta di Max, tasti zoom allineati in altezza al pulsante "Dove sono" (`.maplibregl-ctrl-top-right { top: 50px; }` in `src/components/mappa.tsx`). Da verificare sul telefono; l'ingranaggio di Expo Go (solo sviluppo) può ancora coprirli.
+
+### 2026-11-06 (13:05) - Design: menu a ventaglio
+- Su richiesta di Max: i due pulsanti in alto ("Dove sono", "Aggiungi punto") sostituiti da un pallino a forma di goccia in basso a sinistra che apre un ventaglio di azioni (`src/components/menu-ventaglio.tsx`, usato in `src/app/index.tsx`). Visto da Max su iPhone ("stupendo"); lato spostato da destra a sinistra su sua indicazione.
+- Colori provvisori (navy, azzurro, ghiaccio) in tre costanti del file: il logo è ancora in modifica e non è stato toccato.
+- Aggiunta punto: scritti `form-punto.tsx`, `use-punti.ts` (con `ricarica`) e `database/02_punti_scrittura.sql`. Lo script NON è ancora stato eseguito su Supabase e l'inserimento non è stato provato.
+- `tsc` non completato dopo queste ultime modifiche (controllo interrotto).
+
+### 2026-11-06 (13:20) - Aggiunta punto: posizione toccata sulla mappa e campi completi
+- Richiesta di Max: il punto si sceglie toccando la mappa (non con il GPS) e il modulo deve avere i campi definiti nei requisiti (`docs/01_PROGETTO.md` §5.1).
+- Flusso: menu a ventaglio > Aggiungi > banner "Tocca la mappa" > tocco = coordinate > modulo. Il GPS non serve più per aggiungere un punto; la posizione dell'utente resta solo in memoria ("Dove sono").
+- Campi: tipo (obbligatorio, con "altro"), nome, potabile, funzionamento, bottiglia, accesso, carrozzina, stagionalità + nota, descrizione. Foto, verifiche non ancora.
+- Nuovo `database/03_campi_punto.sql` (da eseguire su Supabase dopo 02): colonne nuove, tipo "altro", limiti di lunghezza.
+- File: `src/components/form-punto.tsx` (riscritto), `mappa.tsx`, `index.tsx`, `data/punti.ts`.
+- NON fatto: controllo che il punto sia dentro la Valle d'Aosta (§5.4); mostrare i nuovi campi nella scheda del punto; `tsc` e prova su telefono.
+
+### 2026-11-09 (13:55) - Test su iPhone e documentazione della fase 8
+- Sviluppatore: Studente A (Max), con la chat Cowork (Claude).
+- Obiettivo: provare le funzioni scritte il 06/11 e aggiornare la documentazione.
+- Preparazione: `npm install` sul Mac (nessun errore; 11 vulnerabilità di `npm audit`, non corrette) e `npx expo start --clear`. Metro compila per iOS senza errori. Avviso: Expo 58.0.17 -> ~58.0.23 e altri 14 pacchetti da aggiornare (non fatto).
+- Test riferiti da Max, iPhone con Expo Go: mappa e punti da Supabase OK; tema scuro del Profilo risolto; logout OK; aggiunta di un punto OK e punto ritrovato su Supabase.
+- NON verificati: salvataggio di tutti i campi del modulo (Max ha controllato che i punti compaiano, non ogni colonna), conferma email Supabase, `tsc` dopo le ultime modifiche, Android, web.
+- Nota: il 09/11 Mayo (Windows) ha riferito l'errore "fetch failed ... hostname could not be found" per l'URL Supabase; l'URL del `.env` di Max è identico. Ipotesi (non verificata): progetto Supabase in pausa. Esito non registrato.
+- File modificati: `docs/07_AUTENTICAZIONE.md`, `CHANGELOG.md`, `DIARIO_SVILUPPO.md`.
+- Attività successive: verificare i campi del punto su Supabase; `tsc`; controllo "dentro la Valle d'Aosta"; mostrare i nuovi campi nella scheda del punto; nome utente pubblico (D29); commit su richiesta di Max.
+
+
+### 2026-11-09 (13:57) - Controllo della tabella `punti` su Supabase (schermata di Max)
+- Righe con `autore` valorizzato (inserite dall'app da un utente collegato): 3. Quella del 09/11 12:51 ("prova") ha salvato descrizione, stato `funzionante`, bottiglia `si`, accesso `strada`, carrozzina `si`, stagionalità `stagionale`. Quella del 06/11 12:14 ha bottiglia `si`, accesso `strada`, carrozzina `no`, stagionalità `tutto_anno`. Quella del 06/11 12:08 ha i valori predefiniti (`non_verificato`, `non_so`), inserita prima del modulo completo.
+- `stagionalita_nota` è NULL anche nella riga "stagionale": non si sa se la nota non era stata scritta o non viene salvata. Da verificare.
+- Seconda schermata (colonne a sinistra): nelle 3 righe dell'app sono salvati nome, tipo (`fontana`), potabile (`potabile`) e coordinate (lat 45.66-45.76, lon 7.63-7.69, dentro la Valle d'Aosta). `comune` è NULL nelle due righe più recenti (nella terza è `chatillon`, scritto a mano): non si sa se il modulo ha un campo comune.
+- La tabella ha 17 righe (14 di esempio con `esempio` = TRUE) e 2 policy RLS.
+
+### 2026-11-09 (14:10) - Scheda del punto con i nuovi campi
+- Su richiesta di Max ("continuiamo a tutto gas"). Controllato nel codice: `stagionalita_nota` viene salvata (NULL solo se il campo è vuoto), quindi il NULL visto su Supabase è coerente con una nota non scritta; non provato con una nota compilata.
+- La scheda del punto ora elenca i campi conosciuti (funziona, bottiglia, accesso, carrozzina, stagionalità + nota); i valori "non so" non compaiono.
+- File modificati: `src/data/punti.ts` (nuovi campi opzionali), `src/hooks/use-punti.ts` (colonne lette), `src/app/index.tsx` (funzione `dettagli` e righe nella scheda).
+- Test: `npx tsc --noEmit` solo i 2 errori già noti (`app-tabs.web.tsx`, `mappa.tsx`), nessuno nuovo. NON provato sul telefono.
+- Attività successive: Max prova la scheda su iPhone; poi controllo "dentro la Valle d'Aosta", nome utente pubblico (D29), commit su richiesta di Max.

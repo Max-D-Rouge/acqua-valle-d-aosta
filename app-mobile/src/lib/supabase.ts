@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import { AppState } from 'react-native';
 
 // Indirizzo e chiave PUBBLICA del progetto Supabase, letti dal file .env (che non va su GitHub).
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -10,7 +12,30 @@ if (!url || !chiave) {
   );
 }
 
-// Per ora nessun login: non salviamo sessioni. Lo cambieremo quando faremo l'autenticazione.
+// Quando Expo prepara la pagina web su Node (rendering sul server) "window" non esiste e AsyncStorage
+// andrebbe in errore ("window is not defined"). In quel caso non c'è nessuna sessione da leggere o salvare.
+const archivio = {
+  getItem: (chiave: string) =>
+    typeof window === 'undefined' ? Promise.resolve(null) : AsyncStorage.getItem(chiave),
+  setItem: (chiave: string, valore: string) =>
+    typeof window === 'undefined' ? Promise.resolve() : AsyncStorage.setItem(chiave, valore),
+  removeItem: (chiave: string) =>
+    typeof window === 'undefined' ? Promise.resolve() : AsyncStorage.removeItem(chiave),
+};
+
+// La sessione (chi ha fatto il login) viene salvata sul telefono con AsyncStorage,
+// così l'utente resta collegato anche dopo aver chiuso l'app.
 export const supabase = createClient(url, chiave, {
-  auth: { persistSession: false, autoRefreshToken: false },
+  auth: {
+    storage: archivio,
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+  },
+});
+
+// Il rinnovo automatico del token si ferma quando l'app è in background e riparte quando torna in primo piano.
+AppState.addEventListener('change', (stato) => {
+  if (stato === 'active') supabase.auth.startAutoRefresh();
+  else supabase.auth.stopAutoRefresh();
 });

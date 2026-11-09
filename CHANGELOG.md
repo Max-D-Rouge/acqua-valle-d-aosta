@@ -4,6 +4,26 @@ Nessuna versione rilasciata. Il progetto dell'app esiste in `app-mobile/` (creat
 
 La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà creato e verificato (Fase 5). Nota 2026-10-23: lo Studente A ha indicato Expo al posto di Flutter (D28 in `DECISIONI_TECNICHE.md`, approvata dallo Studente A il 2026-10-26; conferma di Mayo non registrata; D24 superata, D03 riaperta). Un progetto Expo è stato creato in `app-mobile/`.
 
+## [Non rilasciato] - app Expo (`app-mobile/`, ramo `dev-studente-A`)
+
+### Aggiunto (2026-11-06 / 2026-11-09)
+- Accesso, registrazione e uscita con email e password tramite Supabase Auth; la sessione resta salvata sul telefono (schermata Profilo, sostituisce la demo "Explore").
+- Menu a ventaglio in basso a sinistra con le azioni "Dove sono" e "Aggiungi punto".
+- Aggiunta punto: si tocca la mappa per scegliere la posizione e si compila il modulo (tipo, nome, potabile, funzionamento, bottiglia, accesso, carrozzina, stagionalità, descrizione). Script `database/02_punti_scrittura.sql` e `database/03_campi_punto.sql`.
+
+### Corretto
+- Errore `window is not defined` all'avvio di `expo start` (rendering sul server).
+- Testi illeggibili nel Profilo con l'iPhone in modo scuro.
+
+### Verificato (riferito da Max, iPhone con Expo Go, 2026-11-09)
+- Mappa e punti da Supabase, "Dove sono", registrazione, login, sessione dopo la chiusura, logout, tema scuro, salvataggio di un nuovo punto visibile su Supabase.
+
+### Problemi conosciuti
+- Non provato su Android né su Windows; la mappa non funziona nel browser (WebView).
+- `tsc` non completato dopo le ultime modifiche (2 errori precedenti in `mappa.tsx` e `app-tabs.web.tsx`).
+- Non verificati: salvataggio di tutti i campi del modulo, controllo "punto dentro la Valle d'Aosta" (non ancora scritto), nome utente pubblico (D29).
+- 11 vulnerabilità segnalate da `npm audit` (dipendenze di sviluppo); non corrette di proposito.
+
 ## [Non rilasciato] - prototipo web
 
 ### Aggiunto (2026-10-07)

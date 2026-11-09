@@ -10,6 +10,9 @@ type Props = {
   posizione: { lat: number; lon: number } | null;
   // Chiamata quando si tocca un punto (id) o la mappa vuota (null).
   onSelect: (id: string | null) => void;
+  // Quando è true, il prossimo tocco sulla mappa sceglie la posizione di un nuovo punto.
+  sceltaAttiva: boolean;
+  onScelta: (posizione: { lat: number; lon: number }) => void;
 };
 
 const COLORI = {
@@ -31,6 +34,8 @@ function creaHtml(punti: PuntoAcqua[]) {
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
   html, body, #mappa { margin: 0; height: 100%; }
+  /* Tasti zoom alla stessa altezza del pulsante "Dove sono" (top: 60 in index.tsx; i 10px di margine sono già di MapLibre). */
+  .maplibregl-ctrl-top-right { top: 50px; }
   .io { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(37,99,235,.25); }
   .pin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 </style>
@@ -61,7 +66,25 @@ function creaHtml(punti: PuntoAcqua[]) {
     });
     new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map);
   });
-  map.on('click', function () { invia({ tipo: 'deseleziona' }); });
+  // Modalità "scegli posizione": il tocco sulla mappa manda le coordinate all'app.
+  var sceltaAttiva = false;
+  var marcatoreScelta = null;
+  function impostaScelta(attiva) {
+    sceltaAttiva = attiva;
+    if (!attiva && marcatoreScelta) { marcatoreScelta.remove(); marcatoreScelta = null; }
+  }
+  map.on('click', function (e) {
+    if (sceltaAttiva) {
+      if (marcatoreScelta) marcatoreScelta.remove();
+      var el = document.createElement('div');
+      el.className = 'pin';
+      el.style.background = '#2563eb';
+      marcatoreScelta = new maplibregl.Marker({ element: el }).setLngLat(e.lngLat).addTo(map);
+      invia({ tipo: 'scelta', lat: e.lngLat.lat, lon: e.lngLat.lng });
+    } else {
+      invia({ tipo: 'deseleziona' });
+    }
+  });
 
   // Chiamata dall'app (injectJavaScript): mostra il pallino blu e porta la mappa lì.
   var marcatoreUtente = null;
@@ -80,7 +103,7 @@ function creaHtml(punti: PuntoAcqua[]) {
 </html>`;
 }
 
-export function Mappa({ punti, posizione, onSelect }: Props) {
+export function Mappa({ punti, posizione, onSelect, sceltaAttiva, onScelta }: Props) {
   const html = useMemo(() => creaHtml(punti), [punti]);
   const webviewRef = useRef<WebView>(null);
 
@@ -92,11 +115,19 @@ export function Mappa({ punti, posizione, onSelect }: Props) {
     );
   }, [posizione]);
 
+  // Attiva o spegne la modalità "scegli posizione" dentro la pagina della mappa.
+  useEffect(() => {
+    webviewRef.current?.injectJavaScript(
+      `if (typeof impostaScelta === 'function') { impostaScelta(${sceltaAttiva}); } true;`
+    );
+  }, [sceltaAttiva]);
+
   function gestisciMessaggio(evento: WebViewMessageEvent) {
     try {
       const msg = JSON.parse(evento.nativeEvent.data);
       if (msg.tipo === 'seleziona') onSelect(msg.id);
       else if (msg.tipo === 'deseleziona') onSelect(null);
+      else if (msg.tipo === 'scelta') onScelta({ lat: msg.lat, lon: msg.lon });
     } catch {
       // Messaggio non valido: lo ignoriamo.
     }

@@ -2,7 +2,7 @@
 // Presi dal prototipo web. In futuro verranno letti dal database.
 
 export type Potabilita = 'potabile' | 'non_potabile' | 'non_verificato';
-export type TipoPunto = 'fontana' | 'fontanella' | 'sorgente' | 'punto_struttura';
+export type TipoPunto = 'fontana' | 'fontanella' | 'sorgente' | 'punto_struttura' | 'altro';
 
 export type PuntoAcqua = {
   id: string;
@@ -13,6 +13,13 @@ export type PuntoAcqua = {
   lon: number;
   potabile: Potabilita;
   descrizione?: string;
+  // Campi aggiunti con il modulo "Aggiungi punto" (valori come nel database; 'non_so'/'non_verificato' = sconosciuto).
+  stato?: string | null;
+  bottiglia?: string | null;
+  accesso?: string | null;
+  carrozzina?: string | null;
+  stagionalita?: string | null;
+  stagionalita_nota?: string | null;
 };
 
 export const PUNTI_ESEMPIO: PuntoAcqua[] = [
