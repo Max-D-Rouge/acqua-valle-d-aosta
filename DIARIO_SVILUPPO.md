@@ -775,3 +775,50 @@ Nessuno (da fare a cura di Max).
 - File modificati: `src/data/punti.ts` (nuovi campi opzionali), `src/hooks/use-punti.ts` (colonne lette), `src/app/index.tsx` (funzione `dettagli` e righe nella scheda).
 - Test: `npx tsc --noEmit` solo i 2 errori già noti (`app-tabs.web.tsx`, `mappa.tsx`), nessuno nuovo. NON provato sul telefono.
 - Attività successive: Max prova la scheda su iPhone; poi controllo "dentro la Valle d'Aosta", nome utente pubblico (D29), commit su richiesta di Max.
+
+### 2026-11-09 (14:25) - Avviso sulla potabilità (RQ-01)
+- Su richiesta di Max, dopo la divisione dei compiti con Mayo. La scheda del punto ora usa etichette prudenti ("Indicata come potabile", "Indicata come NON potabile", "Potabilità non verificata") e un avviso fisso: "Informazione inserita dagli utenti: non garantisce che l'acqua sia sicura. In caso di dubbio non bere."
+- File modificato: `app-mobile/src/app/index.tsx`.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; NON provato sul telefono.
+- Non fatto: il campo "fonte" (rimandato, RQ-01).
+
+### 2026-11-09 (14:45) - Segnalazioni sui punti, parte 1 ("alla Waze")
+- Richiesta di Max: avvisi tipo Waze. Scelta di Max: sia segnalazioni sui punti sia avvisi liberi sulla mappa; fatta solo la parte 1 (segnalazioni sui punti), la parte 2 (avvisi liberi con scadenza) NON è ancora fatta.
+- Creati: `database/04_segnalazioni.sql` (tabella `segnalazioni`, regole RLS, trigger che cambia `stato`/`potabile` del punto con 3 voti uguali), `app-mobile/src/components/segnala-punto.tsx`. Modificato: `src/app/index.tsx`. Decisione D30 in `DECISIONI_TECNICHE.md`.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti. Lo script SQL NON è stato eseguito su Supabase e l'app NON è stata provata.
+- Da fare da Max: eseguire `04_segnalazioni.sql` su Supabase; provare con 3 account diversi che lo stato cambia.
+
+### 2026-11-09 (15:05) - Nuova scheda del punto con colori e "Maggiori informazioni"
+- Richiesta di Max: più colori, niente informazioni subito visibili, un pulsante per le maggiori informazioni.
+- Nuovo `app-mobile/src/components/scheda-punto.tsx`: scheda compatta (nome, comune · tipo, etichetta di potabilità colorata come i pallini della mappa, bordo sinistro colorato) e pulsante "Maggiori informazioni" che apre dettagli a chip colorati, descrizione, segnalazioni (`SegnalaPunto`) e avviso fisso. `src/app/index.tsx` ora usa il componente (tolti da lì etichette, dettagli e stili della scheda).
+- L'avviso "Informazione inserita dagli utenti..." è ora nascosto finché non si apre il pulsante; resta visibile subito solo l'etichetta prudente "Indicata come potabile". Scelta da confermare con Max.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; NON provato sul telefono.
+
+### 2026-11-09 (14:40) - Segnalazione unica con più risposte e voti degli altri
+- Richiesta di Max: scegliere più risposte insieme, inviare una sola segnalazione e vedere se gli utenti sono d'accordo.
+- `segnala-punto.tsx` riscritto: 6 domande (scorre, potabile, bottiglia, accesso, carrozzina, stagionalità), risposte selezionabili (si tolgono toccando di nuovo), un solo pulsante "Invia segnalazione (n)" che manda tutte le risposte in una richiesta. Sotto ogni domanda: conteggio dei voti e "tutti d'accordo" / "pareri diversi". I voti già dati dall'utente compaiono preselezionati.
+- Nuovo `database/05_segnalazioni_estese.sql` (da eseguire DOPO 04): 6 campi votabili e regola dei 3 voti uguali per ciascuno. Limite: un voto già dato si può cambiare ma non ritirare.
+- `scheda-punto.tsx`: area dei dettagli più alta (340).
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL NON eseguito e app NON provata sul telefono.
+
+### 2026-11-09 (14:41) - Esito della prova delle segnalazioni
+- Riferito da Max: le segnalazioni (scheda con più risposte e invio unico) "funzionano" sul telefono, dopo l'esecuzione degli script SQL 04 e 05.
+- NON verificato: il cambio automatico del dato con 3 voti uguali da 3 account diversi, i conteggi "tutti d'accordo / pareri diversi" con più utenti.
+- Non ancora committato né caricato su GitHub: file nuovi `scheda-punto.tsx`, `segnala-punto.tsx`, `database/04` e `05`, D30.
+
+### 2026-11-09 (15:00) - Raggruppamento per comune, frazione e nome
+- Richiesta di Max: ritrovare segnalazioni e modifiche per comune > frazione > nome, non per id.
+- Nuovo `database/06_raggruppamento_per_luogo.sql` (da eseguire DOPO 04 e 05): colonna `frazione` in `punti`; tabella `modifiche_punto` (registro dei cambi automatici con 3 voti, con valore vecchio e nuovo); viste `segnalazioni_per_luogo` e `modifiche_per_luogo` ordinate per comune, frazione, nome.
+- App: il modulo "Aggiungi punto" ha i campi facoltativi Comune e Frazione; la scheda mostra "frazione, comune · tipo". File: `form-punto.tsx`, `scheda-punto.tsx`, `data/punti.ts`, `hooks/use-punti.ts`.
+- I 3 punti già inseriti da Max non hanno comune né frazione: compaiono come "(senza comune)" finché non si compilano su Supabase.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL NON eseguito, app NON provata.
+
+### 2026-11-09 (15:15) - Comune e frazione automatici
+- Richiesta di Max: leggere comune e frazione in automatico quando si aggiunge un punto, con correzione a mano possibile.
+- Nuovo `app-mobile/src/lib/luogo.ts` (Nominatim, timeout 6 s, cache, User-Agent identificativo); `form-punto.tsx` compila i due campi appena si sceglie il punto, senza sovrascrivere ciò che l'utente ha già scritto. Decisione D31. Regole di Nominatim lette dalla pagina ufficiale.
+- Non verificato: la richiesta non ha potuto essere provata dal mio ambiente (servizio non raggiungibile); come Nominatim chiama comune e frazione nelle zone della Valle d'Aosta è un'ipotesi, da vedere sul telefono.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti.
+
+### 2026-11-09 (14:49) - Esito della prova di comune e frazione automatici
+- Riferito da Max: la compilazione automatica di comune e frazione "funziona" sul telefono. Non registrati i luoghi provati né se i nomi erano corretti (frazione inclusa).
+- Non ancora committato né caricato su GitHub: scheda del punto, segnalazioni, comune e frazione automatici, script SQL 04, 05 e 06, D30 e D31.

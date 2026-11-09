@@ -651,3 +651,47 @@ Hosting
 - Cloudflare Pages limiti: https://developers.cloudflare.com/pages/platform/limits/
 - Netlify prezzi: https://www.netlify.com/pricing/
 - Vercel Hobby: https://vercel.com/docs/plans/hobby
+
+## D30 - Segnalazioni sui punti (verifica "alla Waze")
+
+### Decisione
+Gli utenti collegati possono votare, dalla scheda di un punto, due domande: "L'acqua scorre?" (funziona / non funziona) e "È potabile?" (sì / no). Quando almeno 3 voti sono uguali, lo stato (o la potabilità) del punto cambia.
+
+### Problema
+Un punto inserito da una persona può essere sbagliato o diventare vecchio: serve un modo rapido per correggerlo senza moderatori.
+
+### Alternative
+- Calcolare il risultato nell'app: più semplice, ma ogni telefono potrebbe arrivare a un risultato diverso e si può aggirare.
+- Un moderatore che approva ogni modifica: più sicuro, ma richiede una persona sempre disponibile.
+- Scelta: un "trigger" nel database (database/04_segnalazioni.sql) che conta i voti.
+
+### Motivazione
+Un solo voto per utente e domanda (modificabile), soglia 3 (richiesta da Max il 26/10), regola nel database così vale per tutti i dispositivi.
+
+### Conseguenze
+- Con 3 account falsi si può cambiare lo stato di un punto: rischio noto, accettato per ora; per la potabilità l'avviso nella scheda resta sempre visibile.
+- Con due risposte entrambe a 3 voti prevale quella con più voti; a parità il risultato è casuale.
+- I voti non scadono: un punto cambiato da 3 voti vecchi può restare sbagliato. Da rivedere (voti recenti) più avanti.
+- Gli avvisi liberi sulla mappa (sentiero chiuso, manutenzione) sono la parte 2, non ancora fatta.
+
+## D31 - Comune e frazione letti in automatico dalle coordinate
+
+### Decisione
+Quando si aggiunge un punto, comune e frazione si compilano da soli con Nominatim (OpenStreetMap, reverse geocoding); l'utente può sempre correggerli a mano.
+
+### Problema
+Per raggruppare punti e segnalazioni per luogo servono comune e frazione, ma scriverli a mano è lento e porta a nomi diversi per lo stesso posto.
+
+### Alternative
+- Testo libero senza aiuto: nessuna dipendenza, ma dati disordinati.
+- Geocoder del telefono (`expo-location`): senza server, ma risultati poco affidabili per le frazioni e diversi tra iPhone e Android.
+- Scelta: Nominatim, che usa i dati OSM già alla base della mappa.
+
+### Motivazione
+Costo zero, nessuna chiave, dati OSM (licenza ODbL, già citata nei crediti). Regole del servizio rispettate: richiesta solo quando l'utente sceglie un punto (mai in background), massimo una al secondo, User-Agent che identifica l'app, cache in memoria.
+
+### Conseguenze
+- Alla pubblicazione online con molti utenti il servizio pubblico potrebbe non bastare: servirebbe un altro provider o un'istanza propria.
+- Si inviano a OSM solo le coordinate del punto scelto, non la posizione dell'utente.
+- Il nome della frazione dipende da come è mappato il luogo su OSM: a volte può mancare o essere il nome del comune.
+- Mappatura dei campi non provata con dati reali al momento della scrittura (2026-11-09).

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import type { Potabilita, TipoPunto } from '@/data/punti';
+import { cercaLuogo } from '@/lib/luogo';
 import { supabase } from '@/lib/supabase';
 
 type Props = {
@@ -73,6 +74,9 @@ function Scegli<T extends string>({ etichetta, opzioni, valore, onCambia }: { et
 // tutto il resto ha un valore predefinito "non so" (docs/01_PROGETTO.md, §5.1).
 export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
   const [nome, setNome] = useState('');
+  const [comune, setComune] = useState('');
+  const [frazione, setFrazione] = useState('');
+  const [cercando, setCercando] = useState(false);
   const [tipo, setTipo] = useState<TipoPunto>('fontana');
   const [potabile, setPotabile] = useState<Potabilita>('non_verificato');
   const [stato, setStato] = useState<Stato>('non_verificato');
@@ -84,6 +88,25 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
   const [descrizione, setDescrizione] = useState('');
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
+
+  // Quando si apre il modulo, comune e frazione si compilano da soli dalle coordinate (si possono sempre correggere).
+  useEffect(() => {
+    if (!visibile || !posizione) return;
+    let annullato = false;
+    setCercando(true);
+    cercaLuogo(posizione.lat, posizione.lon).then((luogo) => {
+      if (annullato) return;
+      if (luogo) {
+        // Non si sovrascrive quello che l'utente ha già scritto.
+        setComune((c) => c || luogo.comune);
+        setFrazione((f) => f || luogo.frazione);
+      }
+      setCercando(false);
+    });
+    return () => {
+      annullato = true;
+    };
+  }, [visibile, posizione]);
 
   function chiudi() {
     setMessaggio(null);
@@ -102,6 +125,8 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
     const { error } = await supabase.from('punti').insert({
       // Il nome nel database è obbligatorio: se vuoto usiamo il tipo (es. "Fontana").
       nome: nome.trim() || (TIPI.find((t) => t.valore === tipo)?.etichetta ?? 'Punto d\'acqua'),
+      comune: comune.trim() || null,
+      frazione: frazione.trim() || null,
       tipo,
       lat: posizione.lat,
       lon: posizione.lon,
@@ -121,6 +146,8 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
       return;
     }
     setNome('');
+    setComune('');
+    setFrazione('');
     setDescrizione('');
     setNotaStagione('');
     setTipo('fontana');
@@ -148,6 +175,14 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
 
           <Text style={styles.etichetta}>Nome (facoltativo)</Text>
           <TextInput style={styles.campo} placeholder="Es. Fontana della piazza" placeholderTextColor="#7a8590" maxLength={80} value={nome} onChangeText={setNome} />
+
+          <Text style={styles.nota}>
+            {cercando ? 'Cerco comune e frazione...' : 'Comune e frazione sono letti da OpenStreetMap: correggili se sono sbagliati.'}
+          </Text>
+          <Text style={styles.etichetta}>Comune (facoltativo)</Text>
+          <TextInput style={styles.campo} placeholder="Es. Châtillon" placeholderTextColor="#7a8590" maxLength={80} value={comune} onChangeText={setComune} />
+          <Text style={styles.etichetta}>Frazione (facoltativa)</Text>
+          <TextInput style={styles.campo} placeholder="Es. Panorama" placeholderTextColor="#7a8590" maxLength={80} value={frazione} onChangeText={setFrazione} />
 
           <Scegli etichetta="L'acqua è potabile?" opzioni={POTABILITA} valore={potabile} onCambia={setPotabile} />
           <Scegli etichetta="Funziona?" opzioni={STATI} valore={stato} onCambia={setStato} />
