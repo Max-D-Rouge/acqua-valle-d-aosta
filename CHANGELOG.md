@@ -50,3 +50,8 @@ La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà cr
 - "Come si raggiunge": nuova scelta "Strada e sentiero".
 - Satellite più nitido (ortofoto AGEA sopra Sentinel-2), rilievo 3D, pulsanti sotto lo zoom.
 - Luoghi della mappa toccabili (negozi, ristoranti, rifugi...) con scheda, percorso e "Più informazioni".
+
+## Aggiunto (2026-11-12, sera) - da provare
+- Segnalazione di una foto (3 motivi), con `database/13_segnalazioni_foto.sql`.
+- Pagina Informazioni: privacy su percorsi, luoghi, foto, mappa; crediti satellite, 3D, percorsi.
+- `docs/08_GPS.md`.

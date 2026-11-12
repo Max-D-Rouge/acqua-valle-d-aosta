@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Acqua VdA</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#18395a">
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="mappa" aria-label="Mappa 3D"></div>
+
+<div class="top">
+  <div class="search">
+    <img src="icon.svg" alt="" class="logo">
+    <input id="cerca" type="search" placeholder="Cerca per nome o descrizione…" aria-label="Cerca">
+    <button class="round" id="accountBtn" title="Account" aria-label="Account">👤</button>
+  </div>
+  <div class="chips" id="chips">
+    <button class="chip tendina" id="apriLista" aria-expanded="false">☰ <span id="conta">Elenco</span> <i>▾</i></button>
+    <button class="chip" data-f="soloPotabili" aria-pressed="false">💧 Potabili</button>
+    <button class="chip" data-f="soloBottiglia" aria-pressed="false">🍼 Bottiglia</button>
+    <button class="chip" data-f="soloFunzionanti" aria-pressed="false">✔ Funzionanti</button>
+    <button class="chip" id="apriFiltri">⚙ Filtri</button>
+  </div>
+  <section class="panel" id="panel" aria-label="Elenco punti">
+    <div class="panel-in">
+      <div class="panel-head"><small id="ordine"></small></div>
+      <ul id="lista"></ul>
+    </div>
+  </section>
+</div>
+
+<div class="fab-col">
+  <button class="fab" id="btnSat" title="Mappa satellitare" aria-label="Mappa satellitare">🛰</button>
+  <button class="fab" id="btn3d" title="2D / 3D" aria-label="Cambia 2D 3D"><b>3D</b></button>
+  <button class="fab" id="nord" title="Orienta a nord" aria-label="Nord"><svg viewBox="0 0 24 24"><path d="M12 3l4 9h-8z"/><path d="M12 21v-9"/></svg></button>
+  <button class="fab" id="vicino" title="La mia posizione" aria-label="La mia posizione"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg></button>
+  <button class="fab primary" id="aggiungi" title="Aggiungi punto" aria-label="Aggiungi punto"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+<button class="info-btn" id="infoBtn" aria-label="Informazioni">ℹ︎ Info</button>
+
+<div id="banner" hidden><span>Tocca la mappa dove si trova l'acqua</span> <button id="usaPos">📍 Usa la mia posizione</button> <button id="annullaAdd">Annulla</button></div>
+<div id="toast" role="status"></div>
+
+<!-- Nuovo punto -->
+<dialog id="dlgAdd">
+  <form method="dialog" id="formAdd">
+    <h2 id="titoloAdd">Nuovo punto acqua</h2>
+    <p id="coord" class="muted"></p>
+    <label>Tipo * <select name="tipo" required></select></label>
+    <label>Nome <input name="nome" maxlength="80" placeholder="Es. Fontana della piazza"></label>
+    <label>Comune <input name="comune" maxlength="60" placeholder="Es. Aosta"></label>
+    <div class="due">
+      <label>Acqua potabile <select name="potabile"></select></label>
+      <label>Stato <select name="stato"></select></label>
+    </div>
+    <label>Descrizione <textarea name="descrizione" maxlength="500" rows="2" placeholder="Come raggiungerla, note…"></textarea></label>
+    <details><summary>Altri dettagli (facoltativi)</summary>
+      <div class="due">
+        <label>Si riempie una bottiglia <select name="bottiglia"></select></label>
+        <label>Accesso <select name="accesso"></select></label>
+        <label>Accessibile in carrozzina <select name="carrozzina"></select></label>
+        <label>Stagionalità <select name="stagionalita"></select></label>
+      </div>
+      <label>Nota sulla stagionalità <input name="stagionalitaNota" maxlength="200"></label>
+      <label>Foto <input type="file" name="foto" accept="image/*"></label>
+      <p class="muted">La foto è pubblica. Niente persone riconoscibili. I metadati (GPS, data) vengono eliminati.</p>
+    </details>
+    <button type="button" class="btn" id="spostaBtn" hidden>📍 Cambia posizione</button>
+    <label class="check"><input type="checkbox" id="ok" required> Ho capito che posizione e dati saranno visibili a tutti.</label>
+    <p id="errAdd" class="err" role="alert"></p>
+    <menu><button class="btn" value="annulla" formnovalidate>Annulla</button><button class="btn pri" id="salvaAdd" value="ok">Salva</button></menu>
+  </form>
+</dialog>
+
+<!-- Filtri -->
+<dialog id="dlgFiltri">
+  <form method="dialog" id="formFiltri">
+    <h2>Filtri</h2>
+    <label>Tipo <select name="tipo"><option value="">Tutti</option></select></label>
+    <label>Entro (serve la tua posizione)
+      <select name="raggio"><option value="0">Nessun limite</option><option value="500">500 m</option><option value="1000">1 km</option><option value="5000">5 km</option></select>
+    </label>
+    <menu><button class="btn" value="reset" id="resetF" formnovalidate>Azzera</button><button class="btn pri" value="ok">Applica</button></menu>
+  </form>
+</dialog>
+
+<!-- Segnalazione -->
+<dialog id="dlgSegn">
+  <form method="dialog" id="formSegn">
+    <h2>Segnala un problema</h2><p class="muted" id="segnPunto"></p>
+    <label>Motivo <select name="motivo"></select></label>
+    <label>Descrizione (facoltativa) <textarea name="descrizione" maxlength="500" rows="3"></textarea></label>
+    <menu><button class="btn" value="annulla" formnovalidate>Annulla</button><button class="btn pri" id="invSegn" value="ok">Invia</button></menu>
+  </form>
+</dialog>
+
+<!-- Account (simulato) -->
+<dialog id="dlgAcc">
+  <form method="dialog" id="formAcc">
+    <h2 id="accTitolo">Accedi</h2>
+    <div id="accLogin">
+      <p class="muted">Prototipo: nessun dato viene inviato. Account di prova in <b>ACCOUNT_PROVA.md</b>. Senza account si possono solo guardare i punti.</p>
+      <label>Email <input type="email" name="email" autocomplete="off" placeholder="prova1@acquavda.test"></label>
+      <label>Password <input type="password" name="pw" autocomplete="off"></label>
+      <p id="errAcc" class="err" role="alert"></p>
+    </div>
+    <div id="accLoggato" hidden><p id="accEmail"></p><p class="muted">I tuoi punti: <b id="miei">0</b></p></div>
+    <menu><button class="btn" value="annulla" formnovalidate>Chiudi</button><button class="btn pri" id="accOk" value="ok">Entra</button></menu>
+  </form>
+</dialog>
+
+<!-- Info -->
+<dialog id="dlgInfo">
+  <form method="dialog">
+    <h2>Acqua Valle d'Aosta</h2>
+    <p>Prototipo di studio: i dati sono di esempio e non verificati.</p>
+    <p class="avviso" id="avvisoInfo"></p>
+    <label class="check"><input type="checkbox" id="demo" checked> Modalità prova: nessun limite di 1 verifica al giorno per punto</label>
+    <p class="muted">Mappa: © OpenStreetMap, OpenFreeMap, MapLibre. Rilievo: Mapzen/AWS Terrain Tiles. Satellite: Esri, Maxar, Earthstar Geographics (uso didattico). I dati aggiunti restano solo in questo browser.</p>
+    <menu><button class="btn" type="button" id="cancellaDati">Cancella i miei dati</button><button class="btn pri" value="ok">Chiudi</button></menu>
+  </form>
+</dialog>
+
+<script src="vendor/maplibre-gl-csp.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

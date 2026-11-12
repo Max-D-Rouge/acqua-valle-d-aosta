@@ -900,3 +900,24 @@ Nessuno (da fare a cura di Max).
 - Modificato: `app-mobile/src/components/mappa.tsx`: livelli satellite creati una volta e poi mostrati/nascosti (prima rimossi e ricreati a ogni tocco); richieste in attesa di 'idle' unite in una sola; sorgenti AGEA con minzoom 12.
 - Test: `tsc` ok (solo i 2 errori noti). Prova sul telefono: DA FARE (Max).
 - Limite noto: i tre anni AGEA sovrapposti restano pesanti a zoom alto; se il lag resta, ridurre a un solo anno.
+
+## 2026-11-12 (19:45-20:10) - Studente A (Max) - Privacy e segnalazione foto
+- Obiettivo: testo sulla privacy e possibilità di segnalare una foto.
+- Creati: `database/13_segnalazioni_foto.sql` (tabella `segnalazioni_foto`, una segnalazione per utente e foto, non si può segnalare la propria; nessuna lettura dall'app), `docs/08_GPS.md`.
+- Modificati: `app-mobile/src/app/informazioni.tsx` (sezioni su percorsi, luoghi, foto, mappa, crediti nuovi), `app-mobile/src/components/foto-punto.tsx` (nel visualizzatore: "Segnala questa foto" con 3 motivi; non appare sulle proprie foto né senza accesso).
+- Test: `tsc` ok (solo i 2 errori noti). Prova sul telefono: DA FARE. SQL 13: DA ESEGUIRE su Supabase prima di provare.
+- Limiti: le segnalazioni si leggono solo dal pannello Supabase (Table Editor); nessuna email. Le foto segnalate non vengono nascoste né rimosse automaticamente.
+- Commit: DA FARE (dopo la prova).
+
+
+---
+
+## 2026-11-12 - Scelta del logo
+
+- Sviluppatore: Studente A (Max), con la chat Cowork.
+- Obiettivo: scegliere il logo dell'app e usare una foto vera di una fontana.
+- Attività: cartella `design/loghi` ripulita (eliminate le vecchie proposte); scelta del logo "segnaposto sulla mappa" con dentro una foto reale della fontana a tronco del Gran Paradiso (Wikimedia Commons, Tiia Monto, CC BY-SA 4.0), ritagliata in modo che l'estremità del tronco tocchi il bordo del cerchio; icona del prototipo web sostituita (`prototipo-web/icon.svg`, cache del service worker `acquavda-v9`).
+- File: `design/loghi/icona_segnaposto_foto.svg` e `_1024.png`, `design/loghi/CREDITI.md`, foto originale; resta anche `icona_segnaposto.svg` (versione disegnata, più leggibile a dimensioni molto piccole).
+- Note: la foto è CC BY-SA 4.0, quindi il logo va accompagnato dal credito all'autore (vedi `CREDITI.md`). Scelta da confermare con lo Studente B.
+- Test: anteprima delle icone a 360, 120, 60 e 40 px; da 60 px in su la fontana si riconosce.
+- Commit: nessuno (a cura di Max).
