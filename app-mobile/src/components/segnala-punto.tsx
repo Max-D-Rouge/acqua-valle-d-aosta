@@ -18,7 +18,7 @@ const DOMANDE: { campo: string; domanda: string; risposte: Risposta[] }[] = [
   { campo: 'stato', domanda: "L'acqua scorre?", risposte: [{ valore: 'funzionante', etichetta: 'Funziona' }, { valore: 'non_funzionante', etichetta: 'Non funziona' }] },
   { campo: 'potabile', domanda: 'È potabile?', risposte: [{ valore: 'potabile', etichetta: 'Sì' }, { valore: 'non_potabile', etichetta: 'No' }] },
   { campo: 'bottiglia', domanda: 'Si può riempire una bottiglia?', risposte: [{ valore: 'si', etichetta: 'Sì' }, { valore: 'no', etichetta: 'No' }] },
-  { campo: 'accesso', domanda: 'Come ci si arriva?', risposte: [{ valore: 'strada', etichetta: 'Su strada' }, { valore: 'sentiero', etichetta: 'Su sentiero' }] },
+  { campo: 'accesso', domanda: 'Come ci si arriva?', risposte: [{ valore: 'strada', etichetta: 'Su strada' }, { valore: 'sentiero', etichetta: 'Su sentiero' }, { valore: 'entrambi', etichetta: 'Entrambi' }] },
   { campo: 'carrozzina', domanda: 'Accessibile in carrozzina?', risposte: [{ valore: 'si', etichetta: 'Sì' }, { valore: 'no', etichetta: 'No' }] },
   { campo: 'stagionalita', domanda: 'Quando c\'è acqua?', risposte: [{ valore: 'tutto_anno', etichetta: "Tutto l'anno" }, { valore: 'stagionale', etichetta: 'Stagionale' }] },
 ];

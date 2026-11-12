@@ -695,3 +695,94 @@ Costo zero, nessuna chiave, dati OSM (licenza ODbL, già citata nei crediti). Re
 - Si inviano a OSM solo le coordinate del punto scelto, non la posizione dell'utente.
 - Il nome della frazione dipende da come è mappato il luogo su OSM: a volte può mancare o essere il nome del comune.
 - Mappatura dei campi non provata con dati reali al momento della scrittura (2026-11-09).
+
+## D32 - Controlli sulle informazioni e blocco degli utenti (PROPOSTA, non approvata né implementata)
+
+### Decisione
+Proposta di Claude del 2026-11-09 dopo la richiesta di Max: dopo 2-3 segnalazioni CONFERMATE di dati errati lo stesso utente viene bloccato; Max chiede se si può bloccare anche il dispositivo.
+
+### Problema
+Chiunque può registrarsi (nessuna età minima) e aggiungere punti o segnalazioni false. Servono controlli sulle informazioni e una sanzione per chi le falsifica ripetutamente.
+
+### Alternative
+- **Blocco dell'account** (consigliato): fattibile con Supabase Auth, che ha già il campo `banned_until` su `auth.users`; dopo il blocco l'utente non può più accedere né scrivere.
+- **Blocco del dispositivo**: non affidabile con costo zero. Gli identificatori del telefono cambiano con la reinstallazione dell'app o il ripristino (iPhone: l'identificativo per fornitore si azzera se si disinstalla l'app; Android: l'ID si azzera con il ripristino di fabbrica). L'unica soluzione solida su iPhone (DeviceCheck/App Attest) e su Android (Play Integrity) richiede, per quanto so, l'Apple Developer Program a pagamento e la pubblicazione sul Play Store: in contrasto con il budget di 0 euro. In più un identificativo del dispositivo è un dato personale: servono informativa e base giuridica, con utenti anche minorenni. DA VERIFICARE nella documentazione ufficiale prima di decidere.
+- **Blocco dell'email**: facile, ma si aggira con un'altra email.
+
+### Controlli sulle informazioni possibili (da scegliere)
+1. Il punto deve essere dentro la Valle d'Aosta (già pianificato).
+2. Niente punti doppi: stessa posizione (circa 10-20 m) e stesso tipo.
+3. Limite di punti e segnalazioni per utente al giorno.
+4. Account nuovi con limiti per le prime 24 ore, e conferma dell'email attiva.
+5. Una segnalazione diventa "certificata" solo quando un amministratore (Max o Mayo) la conferma nel pannello di Supabase (stato `nuova`, `confermata`, `respinta`).
+6. Dopo 2-3 segnalazioni `confermate` sullo stesso utente: blocco dell'account (`banned_until`), con i suoi punti che restano e compaiono "da controllare" (D30).
+
+### Scelta
+In attesa di decisione di Max.
+
+### Conseguenze
+- Il blocco richiede che le segnalazioni siano valutate da una persona: serve qualcuno che controlli regolarmente (Max e Mayo).
+- Il blocco dell'account non impedisce di crearne un altro con un'altra email: è un freno, non una soluzione definitiva.
+- Con il blocco del dispositivo si raccoglierebbero dati personali aggiuntivi: va chiesto al professore.
+
+## D33 - Navigatore verso le fontane e i sentieri (PROPOSTA, non approvata né implementata)
+
+### Decisione
+Oggi la scheda del punto ha il pulsante "Portami qui", che apre Apple Maps (iPhone) o Google Maps (Android). Osservazione di Max (2026-11-09): molte app di navigazione non hanno tutti i sentieri che ci sono nei dati di OpenStreetMap (quelli usati dalla mappa dell'app).
+
+### Problema
+Per arrivare a una fontana su un sentiero, Apple Maps e Google Maps possono non conoscere il sentiero o proporre solo la strada più vicina; per i sentieri di montagna conviene un calcolo del percorso basato sui dati OSM con un profilo "escursionismo".
+
+### Alternative (DA VERIFICARE nella documentazione ufficiale e nei limiti dei servizi prima di scegliere)
+- Tenere "Portami qui" come ora: gratis e semplice, adatto per arrivare alla strada o al parcheggio, non garantito sui sentieri.
+- Aprire un'app basata su OSM (per esempio Organic Maps o OsmAnd) quando è installata: dipende da come l'app accetta le coordinate (link di tipo `geo:` o indirizzi propri) e da cosa funziona su iPhone.
+- Calcolare il percorso dentro la nostra app con un servizio di routing basato su OSM con profilo a piedi o escursionismo (esempi da valutare: OpenRouteService, Valhalla, BRouter, OSRM): servono chiave, limiti di richieste e condizioni d'uso del servizio pubblico, che potrebbero non bastare con molti utenti; alternativa è un'istanza propria, probabilmente fuori dal budget di 0 euro.
+
+### Scelta
+In attesa di decisione di Max. Per ora resta "Portami qui".
+
+### Conseguenze
+- Il navigatore dentro l'app richiede anche la posizione continua del telefono (D29/§16 sul GPS: spiegare perché, quando, cosa succede se il permesso è negato).
+- I sentieri sulla mappa dipendono da come sono rappresentati nello stile OpenFreeMap: da controllare quali sentieri compaiono.
+
+### D33 - Aggiornamento 2026-11-09: scelta di Max e verifiche sui servizi
+- **Scelta di Max**: opzione 3, calcolo del percorso dentro l'app con un servizio basato su OSM. "Portami qui" resta come alternativa.
+- **Verifiche fatte sulle pagine ufficiali (2026-11-09)**:
+  - OpenRouteService (HeiGIT): la pagina dei limiti dell'API ospitata elenca per i profili a piedi una distanza massima di 6.000 km e non riporta limiti di richieste. Un messaggio sul forum ufficiale parla di una quota gratuita di "più di 8000 richieste al giorno" in totale, senza dettaglio per tipo di richiesta. La pagina dei piani con i limiti per ogni servizio e le condizioni d'uso non è stata letta (non raggiungibile): i limiti precisi delle indicazioni a piedi NON sono verificati.
+  - GraphHopper: il piano gratuito ha 500 crediti al giorno, è solo per uso non commerciale, con "un insieme limitato di profili": non confermato che il profilo escursionismo sia incluso (un messaggio sul forum suggerisce di no).
+  - Server di routing FOSSGIS: la pagina delle condizioni è protetta da un controllo anti-bot e non è stata letta.
+  - BRouter: non verificato.
+- **Scelta tecnica provvisoria**: OpenRouteService con profilo `foot-hiking` (escursionismo), solo come prova da confermare con i limiti reali dopo la registrazione.
+- **Sicurezza**: la chiave sta nel file `.env` come `EXPO_PUBLIC_ORS_API_KEY`; le variabili `EXPO_PUBLIC_` finiscono dentro l'app e si possono estrarre. Per una pubblicazione vera la chiave dovrebbe stare su un server (per esempio una funzione di Supabase) e non nell'app.
+- **Privacy**: per calcolare il percorso la posizione di partenza e il punto di arrivo vengono inviati a OpenRouteService (terza parte); l'app non li salva. Va scritto nella pagina Informazioni e nella documentazione sul GPS (§16).
+- **Limiti noti**: il calcolo parte dalla posizione al momento del tocco; non c'è ancora la guida passo passo mentre si cammina, né il ricalcolo se si esce dal percorso.
+
+### D33 - Aggiornamento 2026-11-10: navigazione a piedi/in auto, statale e satellite (PARTE DA RIFINIRE)
+- **Fatto**: il percorso si sceglie con tre pulsanti nella scheda del punto: A piedi (ORS `foot-hiking`), In auto (ORS `driving-car`), Mezzi (apre l'app mappe del telefono in modalità trasporto pubblico). C'è una navigazione passo passo (`hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `lib/geo.ts`): segue il GPS solo mentre è attiva, mostra la prossima indicazione, ricalcola se si resta oltre 40 m dal percorso (almeno 20 s tra un ricalcolo e l'altro), segnala l'arrivo sotto i 25 m. La posizione resta in memoria e viene mandata a ORS solo per calcolare o ricalcolare il percorso.
+- **Verificato da Max sul telefono**: il percorso viene calcolato e disegnato; la schermata di navigazione si apre (indicazione in alto, riepilogo in basso, "Termina"). NON verificato: camminando davvero (avanzamento dei passi, ricalcolo, arrivo), modalità in auto, pulsante Mezzi.
+- **PROBLEMA APERTO - percorso a piedi sulla statale**: il percorso di prova (circa 15,5 km, SS26) passa sulla statale. Il codice (`lib/percorso.ts`) riconosce i tratti "State Road" (tipo 1 di ORS = strade OSM primary/trunk) e, se sono più di 30 m, riprova fino a 3 volte con zone da evitare; l'avviso arancione dovrebbe comparire nella scheda. Non è confermato che il ricalcolo funzioni: il percorso è rimasto lo stesso. Aggiunti messaggi `[percorso]` nel Terminale di Expo per capire la causa (non ancora letti).
+- **Controllo sui dati OSM (strumenti/mappa_sentieri.py, calcolo fatto da Claude sui dati scaricati il 2026-11-10)**: tra Aosta e Verrès esiste nei dati OSM un percorso senza primary/trunk/motorway di circa 42,1 km (contro 15,5 km sulla SS26). Il calcolo usa anche strade di servizio e sterrate che potrebbero essere private: NON verificato. Quindi evitare la statale è possibile nei dati, ma costa quasi il triplo di strada.
+- **Dubbio sul tragitto locale**: in un punto di prova il percorso fa un giro invece di usare un marciapiede visibile sulla mappa; ipotesi (non verificate): marciapiede non collegato nei dati OSM.
+- **Opzioni discusse, non decise**: (1) limite di distanza per il percorso a piedi (es. 5 km) con suggerimento di auto o mezzi; (2) avviso rosso più forte con conferma prima di avviare; (3) calcolo proprio sui dati OSM con server/PostGIS. Consigliate 1+2, in attesa di Max.
+- **Mezzi pubblici**: nessuna API pubblica trovata per l'app vdatransports (S.I.T. Vallée / KENTKART). Gli orari Arriva sono PDF sul sito aosta.arriva.it; il PDF della linea 110 porta la data "dal 01.06.2025", pubblicato anche oggi sul sito. Orari reali in tempo reale NON disponibili. Proposta, non approvata: partire dalla sola linea 110 con orari trascritti e data di validità mostrata.
+
+### D34 - Foto satellitari (2026-11-10)
+## Decisione
+Pulsante "Satellite" nel menu a ventaglio che mostra foto satellitari al posto della mappa disegnata.
+## Problema
+La mappa di OpenFreeMap non ha immagini satellitari.
+## Alternative
+Sentinel-2 cloudless di EOX (licenza CC BY-NC-SA 4.0 per uso non commerciale e didattico, attribuzione obbligatoria); Esri World Imagery (foto più nitide, condizioni d'uso per app di terzi NON verificate); fonti regionali della Valle d'Aosta (non cercate).
+## Scelta
+EOX `s2cloudless-2025_3857`, con l'attribuzione nel pulsante "i" della mappa.
+## Motivazione
+Licenza verificata sulla pagina ufficiale e adatta a un progetto scolastico.
+## Conseguenze
+Risoluzione circa 10 m per pixel: oltre lo zoom 14 l'immagine si ingrandisce e diventa sfocata, quindi non basta per vedere una singola fontana. Se l'app diventasse commerciale servirebbe un'altra licenza. NON ancora provato sul telefono.
+
+### D34 - Aggiornamento 2026-11-12: satellite più nitido, rilievo 3D, luoghi toccabili, foto (NON ancora tutto provato)
+- **Satellite nitido**: sopra Sentinel-2 (10 m per pixel, sfocato) sono aggiunte le ortofoto nazionali AGEA 2022, 2023, 2024 (WMTS `geoportale.agea.gov.it/image/rest/services/AgEA/Ortofoto_AgEA_<anno>/ImageServer/WMTS`, livello `AgEA_Ortofoto_AgEA_<anno>`, GoogleMapsCompatible, zoom fino a 18, circa 40 cm per pixel). Licenza CC BY 4.0 letta su fonti secondarie (geocorsi.it, repository GitHub, rivistageomedia.it); attribuzione "© AGEA – Agenzia per le Erogazioni in Agricoltura" mostrata nella mappa. NON verificato: copertura della Valle d'Aosta per ciascun anno; condizioni di uso continuo da app (la pagina delle note legali di AGEA non è leggibile in automatico). Il servizio regionale VdA ha le ortofoto 2024 (CC BY) solo come file da scaricare, non come mappa a tasselli.
+- **Rilievo 3D**: pulsante "3D" (MapLibre 4.7.1, `setTerrain`) con quote da Terrain Tiles su AWS Open Data (`s3.amazonaws.com/elevation-tiles-prod/terrarium`, formato Terrarium, zoom fino a 15, circa 12 m di risoluzione); nessuna chiave, nessuna garanzia di servizio (SLA); attribuzione Mapzen/Tilezen e EU-DEM (Copernicus) nella mappa. Gli edifici in 3D dipendono dallo stile OpenFreeMap Liberty: NON verificato che li mostri in Valle d'Aosta. Prestazioni sul telefono non provate.
+- **Luoghi toccabili**: toccando un luogo della mappa di base (livello `poi` di OpenFreeMap) compare una scheda con nome, categoria e percorso a piedi / in auto / mezzi. "Più informazioni" (solo se premuto) chiede a Nominatim orari, telefono, sito e indirizzo cercando per nome in un riquadro di circa 100 m (`extratags=1`); le informazioni dipendono da cosa è scritto in OpenStreetMap e possono mancare. Alla richiesta partono il nome del luogo e le sue coordinate, non la posizione dell'utente. Le proprietà dei luoghi vengono scritte nel Terminale di Expo (`[mappa] luogo`) per capire che dati offre la mappa.
+- **Foto dei punti**: bucket Supabase `foto-punti` (pubblico, JPEG, 2 MB), tabella `foto_punti` (`database/11_foto_punti.sql`); foto ridotta a 1280 px più miniatura da 400 px; massimo 5 per punto e 10 al giorno per utente; scatto solo con la fotocamera e solo entro 50 m dal punto (GPS letto una sola volta e non salvato); obbligatoria quando si aggiunge un punto (solo controllo nell'app, il database non la impone). Provata da Max sul telefono: "funziona perfettamente". Non verificato se la ricodifica elimini i dati di posizione (EXIF) della foto.
+- **Accesso "strada e sentiero"**: nuovo valore `entrambi` per "Come si raggiunge" (`database/12_accesso_entrambi.sql`).

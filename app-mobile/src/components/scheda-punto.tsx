@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { FotoPunto } from '@/components/foto-punto';
 import { SegnalaPunto } from '@/components/segnala-punto';
+import { SegnalaUtente } from '@/components/segnala-utente';
 import { Spacing } from '@/constants/theme';
 import type { Potabilita, PuntoAcqua, TipoPunto } from '@/data/punti';
+import { apriMezzi } from '@/lib/mappe-esterne';
+import type { Mezzo } from '@/lib/percorso';
+import { supabase } from '@/lib/supabase';
 
 type Props = {
   punto: PuntoAcqua;
   ricarica: () => void;
   // Distanza dal bordo basso dello schermo (per stare sopra la barra delle schede).
   bottom: number;
+  // Chiamata da "Percorso sentieri": il calcolo lo fa la schermata della mappa.
+  onPercorso: (punto: PuntoAcqua, mezzo: Mezzo) => void;
 };
 
 // Stesso verde / rosso / grigio dei pallini sulla mappa (mappa.tsx).
@@ -41,6 +48,7 @@ function dettagli(p: PuntoAcqua): Dettaglio[] {
   if (p.bottiglia === 'no') righe.push({ testo: 'Non adatta a riempire bottiglie', tono: 'no' });
   if (p.accesso === 'strada') righe.push({ testo: 'Raggiungibile su strada', tono: 'ok' });
   if (p.accesso === 'sentiero') righe.push({ testo: 'Raggiungibile su sentiero', tono: 'ok' });
+  if (p.accesso === 'entrambi') righe.push({ testo: 'Raggiungibile su strada e su sentiero', tono: 'ok' });
   if (p.carrozzina === 'si') righe.push({ testo: 'Accessibile in carrozzina', tono: 'ok' });
   if (p.carrozzina === 'no') righe.push({ testo: 'Non accessibile in carrozzina', tono: 'no' });
   if (p.stagionalita === 'tutto_anno') righe.push({ testo: "Disponibile tutto l'anno", tono: 'ok' });
@@ -49,10 +57,24 @@ function dettagli(p: PuntoAcqua): Dettaglio[] {
 }
 
 // Scheda del punto: compatta (nome, tipo, potabilità) con un pulsante per le maggiori informazioni.
-export function SchedaPunto({ punto, ricarica, bottom }: Props) {
+export function SchedaPunto({ punto, ricarica, bottom, onPercorso }: Props) {
   const [aperta, setAperta] = useState(false);
+  const [autore, setAutore] = useState<string | null>(null);
+
+  // Il nome utente di chi ha aggiunto il punto si legge solo quando si aprono le maggiori informazioni.
+  useEffect(() => {
+    if (!aperta || !punto.autore) return;
+    supabase
+      .from('profili')
+      .select('nome_utente')
+      .eq('id', punto.autore)
+      .maybeSingle()
+      .then(({ data }) => setAutore(data?.nome_utente ?? null));
+  }, [aperta, punto.autore]);
   const pot = POTABILITA[punto.potabile];
   const righe = dettagli(punto);
+  // Punto non di esempio senza autore: l'utente che lo ha aggiunto ha eliminato l'account.
+  const senzaAutore = !punto.autore && !punto.esempio;
   const sottotitolo = [punto.frazione, punto.comune, TIPI[punto.tipo]].filter(Boolean).join(' · ');
 
   return (
@@ -62,6 +84,24 @@ export function SchedaPunto({ punto, ricarica, bottom }: Props) {
       <View style={[styles.badge, { backgroundColor: pot.chiaro }]}>
         <View style={[styles.pallino, { backgroundColor: pot.colore }]} />
         <Text style={[styles.testoBadge, { color: pot.colore }]}>{pot.etichetta}</Text>
+      </View>
+
+      {senzaAutore ? (
+        <View style={styles.daControllare}>
+          <Text style={styles.testoDaControllare}>⚠ Da controllare: l'autore non c'è più</Text>
+        </View>
+      ) : null}
+
+      <View style={styles.rigaPercorsi}>
+        <Pressable style={[styles.percorso, styles.meta]} onPress={() => onPercorso(punto, 'piedi')}>
+          <Text style={styles.testoPortami}>🚶 A piedi</Text>
+        </Pressable>
+        <Pressable style={[styles.percorso, styles.meta]} onPress={() => onPercorso(punto, 'auto')}>
+          <Text style={styles.testoPortami}>🚗 In auto</Text>
+        </Pressable>
+        <Pressable style={[styles.portami, styles.meta]} onPress={() => apriMezzi(punto.lat, punto.lon)}>
+          <Text style={styles.testoPortami}>🚌 Mezzi</Text>
+        </Pressable>
       </View>
 
       <Pressable style={styles.pulsante} onPress={() => setAperta(!aperta)}>
@@ -82,6 +122,10 @@ export function SchedaPunto({ punto, ricarica, bottom }: Props) {
             <Text style={styles.vuoto}>Nessun dettaglio inserito per questo punto.</Text>
           )}
           {punto.descrizione ? <Text style={styles.descrizione}>{punto.descrizione}</Text> : null}
+          <FotoPunto puntoId={punto.id} lat={punto.lat} lon={punto.lon} />
+          {autore ? <Text style={styles.autore}>Aggiunto da {autore}</Text> : null}
+          {autore && punto.autore ? <SegnalaUtente utenteId={punto.autore} puntoId={punto.id} /> : null}
+          {senzaAutore ? <Text style={styles.avvisoAutore}>L'utente che ha aggiunto questo punto ha eliminato l'account: le informazioni potrebbero non essere aggiornate. Aiutaci a controllarle con le segnalazioni qui sotto.</Text> : null}
           <Text style={styles.titolo}>Aiutaci a tenerla aggiornata</Text>
           <SegnalaPunto puntoId={punto.id} onFatto={ricarica} />
           <Text style={styles.avviso}>{AVVISO_ACQUA}</Text>
@@ -112,6 +156,11 @@ const styles = StyleSheet.create({
   badge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
   pallino: { width: 10, height: 10, borderRadius: 5 },
   testoBadge: { fontSize: 13, fontWeight: '700' },
+  rigaPercorsi: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  meta: { flex: 1 },
+  portami: { backgroundColor: '#1f9d55', borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
+  percorso: { backgroundColor: '#2563eb', borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
+  testoPortami: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
   pulsante: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
   testoPulsante: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
   dettagli: { maxHeight: 340, marginTop: 4 },
@@ -124,6 +173,10 @@ const styles = StyleSheet.create({
   testoChipNo: { color: '#7a5a00' },
   vuoto: { fontSize: 14, color: '#4a5560' },
   descrizione: { fontSize: 14, color: '#4a5560', marginTop: 8 },
+  daControllare: { alignSelf: 'flex-start', backgroundColor: '#ffedd5', borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
+  testoDaControllare: { fontSize: 13, fontWeight: '700', color: '#b45309' },
+  avvisoAutore: { fontSize: 13, color: '#b45309', backgroundColor: '#ffedd5', borderRadius: 8, padding: 8, marginTop: 8 },
+  autore: { fontSize: 13, color: '#4a5560', marginTop: 6 },
   titolo: { fontSize: 14, fontWeight: '700', color: '#18395a', marginTop: 12 },
   avviso: { fontSize: 12, color: '#7a5a00', backgroundColor: '#fff3cd', borderRadius: 8, padding: 8, marginTop: 10 },
 });

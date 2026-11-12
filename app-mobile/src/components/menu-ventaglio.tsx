@@ -15,7 +15,7 @@ const NAVY = '#18395a';
 const CIELO = '#7dd3fc';
 const GHIACCIO = '#e0f7ff';
 
-const RAGGIO = 100; // distanza delle azioni dal pallino principale
+const RAGGIO = 160; // distanza delle azioni dal pallino principale (grande abbastanza perché le etichette non si sovrappongano)
 const DIM_PRINCIPALE = 60;
 const DIM_AZIONE = 48;
 
@@ -47,8 +47,8 @@ export function MenuVentaglio({ azioni }: { azioni: Azione[] }) {
 
       <View style={styles.ancora} pointerEvents="box-none">
         {azioni.map((a, i) => {
-          // Angolo: da 80° (quasi in alto) a 10° (quasi a destra).
-          const gradi = n === 1 ? 45 : 80 - (i * 70) / (n - 1);
+          // Angolo: da 90° (in alto) a 0° (a destra), distribuiti in modo uniforme.
+          const gradi = n === 1 ? 45 : 90 - (i * 90) / (n - 1);
           const rad = (gradi * Math.PI) / 180;
           const dx = RAGGIO * Math.cos(rad);
           const dy = -RAGGIO * Math.sin(rad);

@@ -822,3 +822,81 @@ Nessuno (da fare a cura di Max).
 ### 2026-11-09 (14:49) - Esito della prova di comune e frazione automatici
 - Riferito da Max: la compilazione automatica di comune e frazione "funziona" sul telefono. Non registrati i luoghi provati né se i nomi erano corretti (frazione inclusa).
 - Non ancora committato né caricato su GitHub: scheda del punto, segnalazioni, comune e frazione automatici, script SQL 04, 05 e 06, D30 e D31.
+
+### 2026-11-09 (15:30) - Nome utente pubblico e profili (D29)
+- Commit `ec9457d` fatto (Fase 14); push da fare da Max dal Terminale.
+- Su scelta di Max (punto 2 della lista): nome utente pubblico separato dall'email.
+- Nuovo `database/07_profili.sql`: tabella `profili` (id = utente, `nome_utente` 3-20 caratteri tra lettere, numeri e `_`, unico senza distinguere maiuscole), regole RLS: tutti leggono, ognuno crea e modifica solo il proprio.
+- App: `src/hooks/use-profilo.ts` (nuovo); `src/app/profilo.tsx` chiede il nome al primo accesso e permette di cambiarlo, mostra l'email solo all'interessato; `scheda-punto.tsx` mostra "Aggiunto da <nome>" tra le maggiori informazioni; `use-punti.ts` e `data/punti.ts` leggono `autore`.
+- Scelta fatta da Claude, da confermare: il profilo si crea dopo l'accesso (non nel modulo di registrazione), così funziona anche con la conferma email e gli utenti già registrati; "Aggiunto da" compare solo se l'autore ha un nome utente.
+- NON fatto: pulsante "contatta/segnala" che inoltra senza mostrare l'email; cosa succede ai punti se l'utente elimina l'account (RQ-10, domanda al professore: oggi `punti.autore` impedirebbe di eliminare l'utente).
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL NON eseguito, app NON provata.
+
+### 2026-11-09 (15:05) - Account eliminato, punti senza autore e segnalazione utenti con email
+- Esito: Max ha provato il profilo con nome utente ("funziona", script 07 eseguito). Richieste di Max: se l'utente elimina l'account i punti restano, senza il nome di chi li ha messi e/o con un avviso giallo/arancione "da controllare"; quando un utente viene segnalato arriva una mail a Max e a Mayo.
+- Scelta di Claude, da confermare con Max: i punti restano, il nome dell'autore sparisce (`punti.autore` diventa vuoto) E compare l'avviso arancione "Da controllare: l'autore non c'è più" (solo per punti non di esempio senza autore).
+- Nuovo `database/08_account_e_segnalazioni_utenti.sql` (da eseguire DOPO 07): `punti.autore` con `on delete set null`; funzione `elimina_mio_account()`; tabella `segnalazioni_utenti` (nessuna regola di lettura per l'app: si leggono dal pannello Supabase; una segnalazione per coppia segnalante/segnalato); trigger che chiama un servizio per le email.
+- Email: nuovo `servizi/avviso-email.gs` (Google Apps Script gratuito, invia con l'account Gmail di Max). Gli indirizzi dei destinatari e la chiave NON sono nel repository: si impostano nelle proprietà dello script; l'indirizzo del servizio sta nel Vault di Supabase. Senza questa configurazione le segnalazioni si salvano ma nessuna mail parte. Serve l'email di Mayo.
+- App: `segnala-utente.tsx` (nuovo, link "Segnala questo utente" nella scheda), `scheda-punto.tsx` (badge arancione e avviso), `profilo.tsx` ("Elimina account" con conferma), `use-punti.ts` e `data/punti.ts` (campo `esempio`).
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL, servizio email e app NON provati.
+- Mayo (commit `c8017d2` su `dev-studente-B`): pagina Informazioni; ha chiesto se 04, 05, 06 sono già eseguiti su Supabase (sì, da Max, riferito) e propone di chiedere RQ-10 al professore (ora deciso da Max: punti conservati).
+
+### 2026-11-09 (15:26) - Unione con il lavoro di Mayo
+- Max ha fatto `git fetch` e `git merge origin/dev-studente-B` (pagina Informazioni di Mayo, commit `c8017d2`) e riferisce che "funziona" sul telefono. Eseguito da Max, non verificato da Claude.
+- Ancora NON committati né su GitHub: profili (`07_profili.sql`), eliminazione account e segnalazione utenti (`08_...sql`), `servizi/avviso-email.gs`, `segnala-utente.tsx`, `use-profilo.ts`, modifiche a `profilo.tsx`, `scheda-punto.tsx`, `use-punti.ts`, `data/punti.ts`.
+- Da fare da Max: eseguire `08_account_e_segnalazioni_utenti.sql`, configurare il servizio email (passi in `servizi/avviso-email.gs`), poi provare segnalazione utente, eliminazione account e punti "da controllare".
+
+### 2026-11-09 (16:10) - Email di avviso non funzionante e proposta di blocco utenti
+- Provata la configurazione del servizio email (Apps Script + Vault + `pg_net`): Supabase chiama lo script (2 esecuzioni di `doPost` completate), ma la mail non arriva. Max ha deciso di rimandare. Registrato come PS-002 in `docs/13_PROBLEMI_E_SOLUZIONI.md` (APERTO); non risolto.
+- Richiesta di Max: controlli sulle informazioni e, dopo 2-3 segnalazioni confermate di dati errati, blocco dell'utente e del dispositivo. Analisi di fattibilità scritta come proposta D32 in `DECISIONI_TECNICHE.md` (NON approvata, NON implementata): blocco dell'account fattibile; blocco del dispositivo non affidabile a costo zero e con problemi di privacy (da verificare nella documentazione ufficiale).
+- Ancora NON committati: profili, eliminazione account, segnalazione utenti, script `07` e `08`, `servizi/avviso-email.gs`, PS-002, D32.
+
+### 2026-11-09 (16:20) - Controllo "dentro la Valle d'Aosta"
+- Max: "andiamo avanti con altro". Scelto da Claude il controllo già previsto nei requisiti (§5.4), la parte più semplice di D32.
+- Nuovo `app-mobile/src/lib/confini.ts` (rettangolo lat 45.46-45.99, lon 6.80-7.95) usato in `src/app/index.tsx`: se il tocco sulla mappa è fuori regione, non si apre il modulo e compare un messaggio. Nuovo `database/09_confini_valle_d_aosta.sql`: lo stesso rettangolo come vincolo su `punti`, valido anche fuori dall'app.
+- Limite: è un rettangolo, non il confine vero: vicino ai bordi qualche punto fuori regione può passare (confine esatto con PostGIS, più avanti).
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL NON eseguito, app NON provata.
+
+### 2026-11-09 (16:40) - Avvisi sulla mappa e pulsante "Portami qui"
+- Richiesta iniziale di Max (avvisi "alla Waze", poi "Entrambi"); Max non ha indicato tipi e durata, scelti da Claude, da confermare o cambiare: tipi sentiero chiuso, fontana in manutenzione, acqua torbida, pericolo, altro; durata 48 ore uguale per tutti (massimo 3 giorni imposto dal database); solo dentro la Valle d'Aosta.
+- Nuovo `database/10_avvisi.sql` (da eseguire DOPO 09): tabella `avvisi`, tutti vedono solo quelli non scaduti, crea chi è collegato, ognuno rimuove i propri.
+- App: `data/avvisi.ts`, `hooks/use-avvisi.ts`, `components/form-avviso.tsx`, `components/scheda-avviso.tsx` (nuovi); `mappa.tsx` (quadratini arancioni con "!"), `app/index.tsx` (nuova azione "Avviso" nel menu a ventaglio, banner, schede). Lo scatto per i punti non cambia.
+- Aggiunto in `scheda-punto.tsx` il pulsante "Portami qui": apre Apple Maps (iPhone) o Google Maps (altrove) con le indicazioni a piedi verso il punto; la nostra app non legge né salva la posizione. È la versione rapida del navigatore; il navigatore dentro l'app (e verso i sentieri) resta da fare.
+- Non fatto: avvisi non segnalabili come falsi, nessun limite di avvisi per utente al giorno.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; script SQL NON eseguito, app NON provata.
+
+### 2026-11-09 (16:50) - Navigatore e sentieri
+- Osservazione di Max: le app di navigazione comuni non hanno tutti i sentieri presenti nei dati OSM. Registrata come proposta D33 (nessuna implementazione, nessun test).
+
+### 2026-11-09 (17:10) - Percorso a piedi con OpenRouteService (prototipo)
+- Max ha scelto l'opzione 3 (percorso dentro l'app con dati OSM). Ricerca sui servizi di routing: vedi aggiornamento D33; molti limiti NON verificati.
+- Nuovi: `src/lib/percorso.ts` (chiamata a OpenRouteService, profilo `foot-hiking`), `src/components/scheda-percorso.tsx` (distanza, tempo, indicazioni). Modificati: `mappa.tsx` (disegna la linea blu), `scheda-punto.tsx` (pulsante "Percorso sentieri"), `index.tsx` (chiede la posizione solo al tocco), `.env.example` (`EXPO_PUBLIC_ORS_API_KEY`).
+- Per provarlo serve una chiave gratuita di OpenRouteService nel file `app-mobile/.env`; senza chiave l'app lo dice e non succede altro.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti; chiamata al servizio e disegno sulla mappa NON provati.
+- Da fare: testo sulla privacy nella pagina Informazioni (Mayo) e in `docs/08_GPS.md`.
+
+### 2026-11-10 (12:05-13:14) - Navigazione, modalità di viaggio, statale, strumento mappa (Studente A, con Claude)
+- Obiettivo: far funzionare il percorso come un navigatore, scegliere come arrivare, evitare la statale a piedi.
+- Nuovi: `lib/geo.ts`, `hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `strumenti/mappa_sentieri.py`. Modificati: `lib/percorso.ts` (modalità piedi/auto, riconoscimento statale, ricalcolo con zone da evitare, messaggi `[percorso]`), `components/scheda-percorso.tsx`, `scheda-punto.tsx` (pulsanti A piedi / In auto / Mezzi), `mappa.tsx`, `app/index.tsx`.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti. Sul telefono Max ha visto il percorso e la schermata di navigazione; la navigazione camminando, il ricalcolo, la modalità auto e Mezzi NON sono provati.
+- Problema: il percorso passa ancora sulla statale (PS-003, aperto). Lo strumento `mappa_sentieri.py` (Max lo ha eseguito dal Terminale) ha scaricato i dati OSM della zona Aosta-Verrès; Claude ha calcolato che senza statale servono circa 42,1 km.
+- Mezzi pubblici: nessun dato aperto trovato; il PDF della linea 110 è del 01.06.2025. Nessuna implementazione.
+- Imparato: la distanza più breve non è quella sicura per un pedone; un servizio di routing dipende dai dati OSM e li possiamo controllare e correggere.
+- Da fare: leggere i messaggi `[percorso]`, decidere tra limite di distanza e avviso (D33), eventuale linea 110.
+
+### 2026-11-11 (08:10) - Satellite e ventaglio (Studente A, con Claude)
+- Aggiunto il pulsante "Satellite" nel ventaglio (foto Sentinel-2 cloudless di EOX, D34) e ingrandito il raggio del ventaglio da 100 a 160 con angoli uniformi da 90° a 0°, perché le etichette si sovrapponevano. Modificati: `mappa.tsx`, `menu-ventaglio.tsx`, `app/index.tsx`.
+- Test: NON ancora provato sul telefono; `tsc` da rieseguire dopo la riconnessione del Mac.
+
+### 2026-11-12 (10:40-19:30) - Foto dei punti, satellite, 3D, luoghi toccabili (Studente A, con Claude)
+- Nuovi: `database/11_foto_punti.sql`, `database/12_accesso_entrambi.sql`, `lib/foto.ts`, `hooks/use-foto.ts`, `components/foto-punto.tsx`, `components/pulsanti-mappa.tsx`, `components/scheda-luogo.tsx`, `lib/info-luogo.ts`, `lib/mappe-esterne.ts`. Modificati: `form-punto.tsx` (foto obbligatoria, scatto solo vicino al punto, "strada e sentiero"), `scheda-punto.tsx`, `segnala-punto.tsx`, `mappa.tsx` (satellite AGEA+Sentinel, rilievo 3D, tocco sui luoghi), `menu-ventaglio.tsx` (raggio 160), `app/index.tsx`, `app.json` (permessi foto), `package.json` (expo-image-picker, expo-image-manipulator).
+- Provato da Max sul telefono: le foto ("funziona perfettamente") e il satellite (visibile, ma sfocato con Sentinel). NON provati: satellite AGEA, rilievo 3D, tocco sui luoghi e "Più informazioni", obbligo di foto nel modulo "Aggiungi", opzione "strada e sentiero", SQL 12.
+- `npx tsc --noEmit`: solo i 2 errori già noti (WebView).
+- Problema: il satellite Sentinel era sfocato (10 m per pixel): aggiunte le ortofoto AGEA (D34). Il commit di tutto il lavoro è ancora in sospeso.
+
+## 2026-11-12 (19:25) - Studente A (Max) - Alleggerimento satellite/3D
+- Obiettivo: la mappa laggava e dava problemi cambiando satellite/3D mentre caricava.
+- Dal Terminale: errori 400 di AGEA 2022/2023 agli zoom 9-10 (ortofoto non disponibili a zoom bassi); funzionano il tocco sui luoghi (la mappa fornisce solo name, class, subclass, rank: nessun orario/telefono) e il satellite.
+- Modificato: `app-mobile/src/components/mappa.tsx`: livelli satellite creati una volta e poi mostrati/nascosti (prima rimossi e ricreati a ogni tocco); richieste in attesa di 'idle' unite in una sola; sorgenti AGEA con minzoom 12.
+- Test: `tsc` ok (solo i 2 errori noti). Prova sul telefono: DA FARE (Max).
+- Limite noto: i tre anni AGEA sovrapposti restano pesanti a zoom alto; se il lag resta, ridurre a un solo anno.

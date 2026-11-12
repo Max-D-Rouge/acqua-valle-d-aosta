@@ -9,6 +9,8 @@ export type PuntoAcqua = {
   nome: string;
   comune: string;
   frazione?: string | null;
+  autore?: string | null;
+  esempio?: boolean;
   tipo: TipoPunto;
   lat: number;
   lon: number;

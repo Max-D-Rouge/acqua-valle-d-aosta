@@ -13,7 +13,7 @@ export function usePunti() {
   const ricarica = useCallback(async () => {
     const { data, error } = await supabase
       .from('punti')
-      .select('id, nome, comune, frazione, tipo, lat, lon, potabile, descrizione, stato, bottiglia, accesso, carrozzina, stagionalita, stagionalita_nota');
+      .select('id, nome, comune, frazione, autore, esempio, tipo, lat, lon, potabile, descrizione, stato, bottiglia, accesso, carrozzina, stagionalita, stagionalita_nota');
     if (error) setErrore(error.message);
     else {
       setErrore(null);

@@ -1,8 +1,10 @@
+import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import type { Potabilita, TipoPunto } from '@/data/punti';
+import { caricaFile, collegaFoto, controllaArea, RAGGIO_AREA_M, scartaFile, scattaFoto, type FotoScelta } from '@/lib/foto';
 import { cercaLuogo } from '@/lib/luogo';
 import { supabase } from '@/lib/supabase';
 
@@ -12,7 +14,8 @@ type Props = {
   posizione: { lat: number; lon: number } | null;
   onChiudi: () => void;
   // Chiamata dopo che il punto è stato salvato.
-  onSalvato: () => void;
+  // Con un testo se il punto è stato salvato ma qualcosa non è andato (es. la foto): l'app lo mostra dopo la chiusura.
+  onSalvato: (avviso?: string) => void;
 };
 
 type Scelta<T extends string> = { valore: T; etichetta: string }[];
@@ -41,10 +44,11 @@ const SI_NO: Scelta<SiNo> = [
   { valore: 'no', etichetta: 'No' },
   { valore: 'non_so', etichetta: 'Non so' },
 ];
-type Accesso = 'strada' | 'sentiero' | 'non_so';
+type Accesso = 'strada' | 'sentiero' | 'entrambi' | 'non_so';
 const ACCESSI: Scelta<Accesso> = [
   { valore: 'strada', etichetta: 'Su strada' },
   { valore: 'sentiero', etichetta: 'Su sentiero' },
+  { valore: 'entrambi', etichetta: 'Strada e sentiero' },
   { valore: 'non_so', etichetta: 'Non so' },
 ];
 type Stagione = 'tutto_anno' | 'stagionale' | 'non_so';
@@ -70,7 +74,7 @@ function Scegli<T extends string>({ etichetta, opzioni, valore, onCambia }: { et
   );
 }
 
-// Modulo per aggiungere un punto d'acqua. Obbligatori solo posizione (toccata sulla mappa) e tipo:
+// Modulo per aggiungere un punto d'acqua. Obbligatori posizione (toccata sulla mappa), tipo e una foto scattata sul posto:
 // tutto il resto ha un valore predefinito "non so" (docs/01_PROGETTO.md, §5.1).
 export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
   const [nome, setNome] = useState('');
@@ -88,6 +92,9 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
   const [descrizione, setDescrizione] = useState('');
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
+  // La foto è obbligatoria: si scatta con la fotocamera, solo se si è nell'area del punto.
+  const [foto, setFoto] = useState<FotoScelta | null>(null);
+  const [controlloFoto, setControlloFoto] = useState(false);
 
   // Quando si apre il modulo, comune e frazione si compilano da soli dalle coordinate (si possono sempre correggere).
   useEffect(() => {
@@ -110,7 +117,24 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
 
   function chiudi() {
     setMessaggio(null);
+    setFoto(null);
     onChiudi();
+  }
+
+  async function scatta() {
+    if (!posizione) return;
+    setMessaggio(null);
+    setControlloFoto(true);
+    const fuoriArea = await controllaArea(posizione.lat, posizione.lon);
+    setControlloFoto(false);
+    if (fuoriArea) {
+      setMessaggio(fuoriArea);
+      return;
+    }
+    const scelta = await scattaFoto();
+    if (!scelta) return;
+    if ('errore' in scelta) setMessaggio(scelta.errore);
+    else setFoto(scelta);
   }
 
   async function salva() {
@@ -119,10 +143,22 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
       setMessaggio('Manca la posizione: chiudi e tocca la mappa.');
       return;
     }
+    if (!foto) {
+      setMessaggio('La foto è obbligatoria: scatta una foto del punto d\'acqua.');
+      return;
+    }
     setOccupato(true);
 
-    // "autore" non si manda: lo compila il database con l'utente collegato.
-    const { error } = await supabase.from('punti').insert({
+    // 1) Si carica la foto (il punto non ha ancora un identificativo, quindi la colleghiamo dopo).
+    const file = await caricaFile(foto);
+    if ('errore' in file) {
+      setOccupato(false);
+      setMessaggio(file.errore);
+      return;
+    }
+
+    // 2) Si salva il punto. "autore" non si manda: lo compila il database con l'utente collegato.
+    const { data: nuovo, error } = await supabase.from('punti').insert({
       // Il nome nel database è obbligatorio: se vuoto usiamo il tipo (es. "Fontana").
       nome: nome.trim() || (TIPI.find((t) => t.valore === tipo)?.etichetta ?? 'Punto d\'acqua'),
       comune: comune.trim() || null,
@@ -138,13 +174,26 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
       stagionalita,
       stagionalita_nota: notaStagione.trim() || null,
       descrizione: descrizione.trim() || null,
-    });
-    setOccupato(false);
+    }).select('id').single();
 
-    if (error) {
-      setMessaggio(`Non è stato salvato: ${error.message}`);
+    if (error || !nuovo) {
+      // Punto non salvato: togliamo anche la foto appena caricata.
+      await scartaFile(file);
+      setOccupato(false);
+      setMessaggio(`Non è stato salvato: ${error?.message ?? 'errore sconosciuto'}`);
       return;
     }
+
+    // 3) Si collega la foto al punto.
+    const erroreFoto = await collegaFoto(nuovo.id, file);
+    setOccupato(false);
+    // Caso raro: il punto c'è ma senza foto. Lo diciamo dopo la chiusura: la foto si aggiunge dalla scheda del punto.
+    let avviso: string | undefined;
+    if (erroreFoto) {
+      await scartaFile(file);
+      avviso = `Il punto è stato salvato, ma la foto no (${erroreFoto}) Aggiungila dalla scheda del punto.`;
+    }
+    setFoto(null);
     setNome('');
     setComune('');
     setFrazione('');
@@ -157,7 +206,7 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
     setAccesso('non_so');
     setCarrozzina('non_so');
     setStagionalita('non_so');
-    onSalvato();
+    onSalvato(avviso);
   }
 
   return (
@@ -193,6 +242,16 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
           {stagionalita === 'stagionale' ? (
             <TextInput style={styles.campo} placeholder="Es. aperta da giugno a settembre" placeholderTextColor="#7a8590" maxLength={200} value={notaStagione} onChangeText={setNotaStagione} />
           ) : null}
+
+          <Text style={styles.etichetta}>Foto del punto *</Text>
+          {foto ? <Image source={{ uri: foto.uri }} style={styles.anteprima} contentFit="cover" /> : null}
+          <Pressable style={styles.scatta} onPress={scatta} disabled={controlloFoto || occupato}>
+            <Text style={styles.testoScatta}>{foto ? '📷 Scatta di nuovo' : '📷 Scatta la foto'}</Text>
+          </Pressable>
+          {controlloFoto ? <ActivityIndicator /> : null}
+          <Text style={styles.nota}>
+            La foto è obbligatoria e va scattata sul posto (entro {RAGGIO_AREA_M} m dal punto scelto): la posizione serve solo a verificarlo e non viene salvata.
+          </Text>
 
           <Text style={styles.etichetta}>Descrizione (facoltativa)</Text>
           <TextInput
@@ -236,5 +295,8 @@ const styles = StyleSheet.create({
   pulsante: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: Spacing.three },
   disattivo: { opacity: 0.5 },
   testoPulsante: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  anteprima: { width: '100%', height: 200, borderRadius: 12, backgroundColor: '#e5edf3' },
+  scatta: { borderWidth: 1, borderColor: '#18395a', borderRadius: 12, paddingVertical: 12, alignItems: 'center', backgroundColor: '#ffffff' },
+  testoScatta: { color: '#18395a', fontSize: 16, fontWeight: '600' },
   link: { color: '#18395a', textAlign: 'center', fontSize: 15, textDecorationLine: 'underline', marginTop: Spacing.two },
 });

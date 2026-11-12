@@ -25,3 +25,23 @@ Qui si registrano gli errori importanti: cosa è successo, cosa significa, causa
 - **Perché dovrebbe funzionare**: toglie l'installazione rimasta a metà, usa le versioni esatte del lockfile e riprova i download che cadono. Non risolve però una rete che blocca il registro.
 - **Test da ripetere**: `npm ci` finisce senza errori; poi `npx expo start` mostra il QR code.
 - **Esito**: da compilare.
+
+## PS-002 - L'email di avviso per gli utenti segnalati non arriva
+
+- **Stato**: APERTO (2026-11-09). Max ha deciso di rimandare e andare avanti.
+- **Chi / dove**: Studente A (Max), Supabase (progetto AcquaVdA) e Google Apps Script con l'account `maxderosso@gmail.com`.
+- **Cosa è successo** (riferito da Max, con schermate): configurato il servizio di `servizi/avviso-email.gs` (proprietà `DESTINATARI` e `CHIAVE`, deployment "App web" come "Me", accesso "Chiunque") e salvato l'indirizzo nel Vault di Supabase (controllo: `pg_net` attivo, tabella `segnalazioni_utenti` presente, `segreto` = 1). Dopo una segnalazione di prova inserita dal SQL Editor, nessuna email è arrivata.
+- **Cosa risulta dalle schermate**: nella pagina "Esecuzioni" di Apps Script compaiono 2 esecuzioni di `doPost`, "Completata" (9 nov 2026, 15:58:55 e 16:01:08, circa 0,8 secondi). Quindi la richiesta da Supabase arriva allo script. Non è stato controllato se la mail risulta in "Posta inviata" di Gmail.
+- **Cosa significa**: "Completata" vuol dire solo che lo script non è andato in errore. Se la chiave nell'URL non coincide con la proprietà `CHIAVE`, lo script risponde "non autorizzato" ed esce senza spedire (comportamento scritto nel codice).
+- **Cause possibili (NON verificate)**: chiave diversa tra URL del Vault e proprietà `CHIAVE`; destinatari scritti male; permesso di invio email non concesso; email finita nello spam.
+- **Da fare**: controllare "Posta inviata" su Gmail; confrontare la chiave; aggiungere nello script una riga di log (`console.log`) per vedere quale ramo viene eseguito; ricreare il segreto con `delete from vault.secrets where name = 'avviso_segnalazioni_url'` e `vault.create_secret(...)`.
+- **Nota**: `select ... from net._http_response` ha dato "relation does not exist" nel progetto di Max: l'esito delle richieste di `pg_net` va cercato in un altro modo (da verificare nella documentazione di `pg_net`).
+- **Conseguenza**: finché non è risolto, le segnalazioni di utenti si salvano nella tabella `segnalazioni_utenti` ma Max e Mayo devono controllarla a mano nel pannello di Supabase.
+- **Esito**: da compilare.
+
+## PS-003 - Il percorso a piedi passa sulla statale (APERTO, da rifinire)
+- **Sintomo**: il percorso a piedi di prova (circa 15,5 km) segue la SS26; Max (2026-11-10) segnala che a piedi non si può passare. L'avviso arancione non è stato visto nelle schermate fatte in navigazione.
+- **Cause provate**: all'inizio avevo messo `preference: shortest`, che sceglie il tragitto più corto senza guardare il tipo di strada (poi tornato a `recommended`). Nome del campo del tipo di strada: la documentazione ORS scrive `waytype`, il codice leggeva `waytypes`: corretto, ora accetta entrambi.
+- **Controllo sui dati**: un percorso senza statale tra Aosta e Verrès esiste in OSM ma è di circa 42,1 km.
+- **Non ancora chiarito**: se ORS ha ricevuto e applicato le zone da evitare. Aggiunti messaggi `[percorso]` nel Terminale di Expo; vanno letti dopo una prova (il test con le righe stampate non è stato ancora fatto).
+- **Esito**: da compilare. Decisione di prodotto in attesa di Max (vedi D33: limite di distanza + avviso).

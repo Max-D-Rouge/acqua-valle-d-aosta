@@ -36,3 +36,17 @@ La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà cr
 ### Problemi conosciuti
 - Provato con una mappa di base finta: manca la prova sul Mac con la mappa vera.
 - Controlli del 12/10/2026 sul Mac di Max (riferiti da Max): `node prototipo-web/test.mjs` superato e `git diff --check` senza output. Non provano il funzionamento della mappa nel browser.
+
+### Aggiunto (2026-11-10 / 2026-11-11, non ancora tutto provato)
+- Percorso verso un punto con tre modi: a piedi, in auto (OpenRouteService), mezzi (apre l'app mappe del telefono).
+- Navigazione passo passo con GPS attivo solo durante la guida, ricalcolo se si esce dal percorso, avviso di arrivo.
+- Avviso arancione se il percorso a piedi usa strade statali (riconoscimento ancora da verificare, vedi PS-003).
+- Pulsante "Satellite" nel ventaglio (EOX Sentinel-2 cloudless, risoluzione circa 10 m); ventaglio più grande.
+- Strumento `strumenti/mappa_sentieri.py` per disegnare in SVG i sentieri OSM di una zona.
+- Problema conosciuto: il percorso a piedi può ancora passare sulla statale (PS-003).
+
+### Aggiunto (2026-11-12, non ancora tutto provato)
+- Foto dei punti: scatto con la fotocamera (solo entro 50 m dal punto), miniature, ingrandimento, eliminazione delle proprie; foto obbligatoria quando si aggiunge un punto.
+- "Come si raggiunge": nuova scelta "Strada e sentiero".
+- Satellite più nitido (ortofoto AGEA sopra Sentinel-2), rilievo 3D, pulsanti sotto lo zoom.
+- Luoghi della mappa toccabili (negozi, ristoranti, rifugi...) con scheda, percorso e "Più informazioni".

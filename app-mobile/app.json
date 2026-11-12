@@ -8,9 +8,11 @@
     "scheme": "appmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.maxderosso.app-mobile"
     },
     "android": {
+      "package": "com.maxderosso.appmobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -31,6 +33,13 @@
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AcquaVDA usa le tue foto solo per aggiungerne una a un punto d'acqua, quando lo scegli tu.",
+          "cameraPermission": "AcquaVDA usa la fotocamera solo per scattare una foto a un punto d'acqua, quando lo scegli tu."
         }
       ]
     ],

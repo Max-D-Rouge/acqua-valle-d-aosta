@@ -23,3 +23,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# File generati da strumenti/mappa_sentieri.py (pesanti)
+mappa_sentieri.json
+mappa_sentieri.svg
