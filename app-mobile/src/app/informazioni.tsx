@@ -19,10 +19,41 @@ export default function InformazioniScreen() {
         Diventa pubblica solo se crei un nuovo punto e lo confermi in modo esplicito.
       </Text>
 
+      <Text style={styles.sezione}>Percorsi e navigazione</Text>
+      <Text style={styles.testo}>
+        Quando chiedi un percorso, la tua posizione e la destinazione vengono inviate al servizio OpenRouteService
+        (HeiGIT) per calcolarlo. Durante la navigazione la posizione resta nel telefono e viene inviata di nuovo solo
+        se serve ricalcolare il percorso. Non la salviamo.
+      </Text>
+
+      <Text style={styles.sezione}>Luoghi sulla mappa</Text>
+      <Text style={styles.testo}>
+        Se tocchi "Più informazioni" su un luogo, il suo nome e le sue coordinate (non la tua posizione) vengono
+        inviati a Nominatim, il servizio di ricerca di OpenStreetMap. Le informazioni dipendono da ciò che gli utenti
+        di OpenStreetMap hanno inserito.
+      </Text>
+
+      <Text style={styles.sezione}>Foto dei punti</Text>
+      <Text style={styles.testo}>
+        Le foto si scattano solo dentro l'app e solo vicino al punto: la posizione serve una volta sola per
+        verificarlo e non viene salvata. Le foto caricate sono visibili a tutti e collegate al tuo account: puoi
+        eliminare le tue, e chiunque può segnalare una foto. Fotografa solo il punto d'acqua, senza persone
+        riconoscibili.
+      </Text>
+
+      <Text style={styles.sezione}>Mappa</Text>
+      <Text style={styles.testo}>
+        Per mostrare la mappa il telefono scarica le immagini da server esterni (OpenFreeMap, EOX, AGEA, AWS): questi
+        servizi vedono l'indirizzo internet del telefono e la zona che stai guardando.
+      </Text>
+
       <Text style={styles.sezione}>Crediti</Text>
       <Text style={styles.testo}>Dati della mappa: © OpenStreetMap contributors.</Text>
       <Text style={styles.testo}>Mappa di base: OpenFreeMap.</Text>
       <Text style={styles.testo}>Visualizzazione della mappa: MapLibre.</Text>
+      <Text style={styles.testo}>Satellite: EOxCloudless (Sentinel-2, Copernicus) e ortofoto AGEA (CC BY 4.0).</Text>
+      <Text style={styles.testo}>Rilievo 3D: Terrain Tiles (Mapzen/Tilezen, dati EU-DEM Copernicus).</Text>
+      <Text style={styles.testo}>Percorsi: OpenRouteService (HeiGIT). Informazioni sui luoghi: Nominatim.</Text>
     </ScrollView>
   );
 }

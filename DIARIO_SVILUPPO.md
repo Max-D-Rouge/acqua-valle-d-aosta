@@ -921,3 +921,16 @@ Nessuno (da fare a cura di Max).
 - Note: la foto è CC BY-SA 4.0, quindi il logo va accompagnato dal credito all'autore (vedi `CREDITI.md`). Scelta da confermare con lo Studente B.
 - Test: anteprima delle icone a 360, 120, 60 e 40 px; da 60 px in su la fontana si riconosce.
 - Commit: nessuno (a cura di Max).
+
+## 2026-11-16 (13:49) - Studente A (Max) - Nuovi segnaposto dei punti
+- Obiettivo: usare le immagini fornite da Max (5 tipi x 3 stati) al posto dei pallini colorati.
+- Fatto: ritagliate le 15 icone dalla tavola, sfondo reso trasparente con contorno bianco, ridotte a 74x92 px e a 96 colori (circa 34 KB in tutto); incorporate come testo base64 in `app-mobile/src/data/icone-punti.ts` (la mappa è una pagina web in una WebView e non legge le immagini dell'app).
+- Modificato: `app-mobile/src/components/mappa.tsx` (segnaposto 37x46 px, punta in basso sulle coordinate; se tipo o stato non hanno icona resta il pallino).
+- Test: `tsc` ok (solo i 2 errori noti). Prova sul telefono: DA FARE (Max).
+- Nota: le immagini le ha fornite Max; l'origine e la licenza non sono state verificate da me.
+
+## 2026-11-16 (14:01) - Studente A (Max) - Raggruppamento dei punti
+- Obiettivo: unire i punti vicini in un solo cerchio col numero, più grande se i punti sono tanti, in base allo zoom.
+- Modificato: `app-mobile/src/components/mappa.tsx`: sorgente GeoJSON `punti` con `cluster: true` (raggio 50 px, raggruppa fino a zoom 16); i segnaposto (icone e cerchi) restano elementi HTML aggiornati a fine movimento e al caricamento dei dati; diametro cerchio = 34 + radice(n) x 7 px, massimo 72; il tocco su un cerchio zooma per aprirlo.
+- Test: `tsc` ok (solo i 2 errori noti), sintassi della pagina web controllata con `node --check`. Prova sul telefono: DA FARE (Max). Non so ancora come si comporta con molti punti reali.
+- Limiti noti: i cerchi non cambiano colore in base allo stato dei punti contenuti; durante lo zoom con le dita i segnaposto si aggiornano solo a fine movimento.

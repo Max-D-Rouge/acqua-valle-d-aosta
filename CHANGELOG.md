@@ -55,3 +55,7 @@ La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà cr
 - Segnalazione di una foto (3 motivi), con `database/13_segnalazioni_foto.sql`.
 - Pagina Informazioni: privacy su percorsi, luoghi, foto, mappa; crediti satellite, 3D, percorsi.
 - `docs/08_GPS.md`.
+
+## Modificato (2026-11-16) - da provare
+- Segnaposto dei punti: icone per tipo (fontana, fontanella, sorgente, struttura, altro) e stato (potabile, non potabile, non verificato).
+- Raggruppamento dei punti vicini in cerchi con il numero (2026-11-16), da provare.

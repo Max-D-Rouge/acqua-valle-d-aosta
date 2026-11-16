@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import type { Avviso } from '@/data/avvisi';
+import { ICONE_PUNTI } from '@/data/icone-punti';
 import type { PuntoAcqua } from '@/data/punti';
 
 type Props = {
@@ -41,6 +42,7 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
   const dati = JSON.stringify(punti).replace(/</g, '\\u003c');
   const datiAvvisi = JSON.stringify(avvisi).replace(/</g, '\\u003c');
   const colori = JSON.stringify(COLORI);
+  const icone = JSON.stringify(ICONE_PUNTI);
   return `<!doctype html>
 <html>
 <head>
@@ -53,6 +55,9 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
   .maplibregl-ctrl-top-right { top: 50px; }
   .io { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(37,99,235,.25); }
   .avv { width: 26px; height: 26px; border-radius: 6px; background: #f59e0b; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); color: #fff; font: bold 16px/20px sans-serif; text-align: center; }
+  /* Segnaposto dei punti d'acqua (immagini PNG): 37x46 px, la punta in basso è la posizione esatta. */
+  .icona { width: 37px; height: 46px; background-size: contain; background-repeat: no-repeat; cursor: pointer; }
+  .grappolo { border-radius: 50%; background: #18395a; border: 3px solid #fff; box-shadow: 0 1px 5px rgba(0,0,0,.5); color: #fff; font-weight: 700; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-sizing: border-box; cursor: pointer; }
   .pin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 </style>
 </head>
@@ -63,6 +68,7 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
   var PUNTI = ${dati};
   var AVVISI = ${datiAvvisi};
   var COLORI = ${colori};
+  var ICONE = ${icone};
   function invia(messaggio) {
     window.ReactNativeWebView.postMessage(JSON.stringify(messaggio));
   }
@@ -79,15 +85,75 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
     invia({ tipo: 'log', fonte: e && e.sourceId, testo: (e && e.error && e.error.message) || 'errore della mappa' });
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-  PUNTI.forEach(function (p) {
+  // Raggruppamento: i punti vicini si uniscono in un cerchio col numero (più punti = cerchio più grande).
+  // MapLibre calcola i gruppi (sorgente GeoJSON con "cluster"); noi disegniamo i segnaposto come elementi HTML.
+  var segnapunti = {};
+  function creaPunto(pr, coord) {
     var el = document.createElement('div');
-    el.className = 'pin';
-    el.style.background = COLORI[p.potabile];
+    var icona = ICONE[pr.tipo + '_' + pr.potabile];
+    if (icona) {
+      el.className = 'icona';
+      el.style.backgroundImage = 'url(' + icona + ')';
+    } else {
+      // Tipo o stato sconosciuto: pallino colorato come prima.
+      el.className = 'pin';
+      el.style.background = COLORI[pr.potabile] || COLORI.non_verificato;
+    }
     el.addEventListener('click', function (e) {
       e.stopPropagation();
-      invia({ tipo: 'seleziona', id: p.id });
+      invia({ tipo: 'seleziona', id: pr.id });
     });
-    new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map);
+    // anchor 'bottom': la punta del segnaposto sta sulle coordinate del punto.
+    return new maplibregl.Marker({ element: el, anchor: icona ? 'bottom' : 'center' }).setLngLat(coord).addTo(map);
+  }
+  function creaGruppo(pr, coord) {
+    var n = pr.point_count;
+    var d = Math.round(Math.min(34 + Math.sqrt(n) * 7, 72));
+    var el = document.createElement('div');
+    el.className = 'grappolo';
+    el.style.width = d + 'px';
+    el.style.height = d + 'px';
+    el.style.fontSize = (d > 56 ? 18 : 15) + 'px';
+    el.textContent = String(n);
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      // Zoom necessario per "aprire" il gruppo.
+      map.getSource('punti').getClusterExpansionZoom(pr.cluster_id).then(function (zoom) {
+        map.easeTo({ center: coord, zoom: zoom + 0.5 });
+      });
+    });
+    return new maplibregl.Marker({ element: el }).setLngLat(coord).addTo(map);
+  }
+  function aggiornaSegnapunti() {
+    var nuovi = {};
+    map.querySourceFeatures('punti').forEach(function (f) {
+      var pr = f.properties;
+      var chiave = pr.cluster ? 'g' + pr.cluster_id : 'p' + pr.id;
+      if (nuovi[chiave]) return; // lo stesso elemento può comparire in più tessere della mappa
+      nuovi[chiave] = segnapunti[chiave] || (pr.cluster ? creaGruppo(pr, f.geometry.coordinates.slice()) : creaPunto(pr, f.geometry.coordinates.slice()));
+    });
+    Object.keys(segnapunti).forEach(function (k) { if (!nuovi[k]) segnapunti[k].remove(); });
+    segnapunti = nuovi;
+  }
+  map.on('load', function () {
+    map.addSource('punti', {
+      type: 'geojson',
+      cluster: true,
+      clusterRadius: 50,
+      clusterMaxZoom: 16, // da zoom 17 in poi ogni punto è mostrato da solo
+      data: {
+        type: 'FeatureCollection',
+        features: PUNTI.map(function (p) {
+          return { type: 'Feature', properties: { id: p.id, tipo: p.tipo, potabile: p.potabile }, geometry: { type: 'Point', coordinates: [p.lon, p.lat] } };
+        })
+      }
+    });
+    // Livello invisibile: serve solo perché MapLibre carichi i dati della sorgente.
+    map.addLayer({ id: 'punti-invisibile', type: 'circle', source: 'punti', paint: { 'circle-radius': 1, 'circle-opacity': 0 } });
+    map.on('moveend', aggiornaSegnapunti);
+    map.on('sourcedata', function (e) {
+      if (e.sourceId === 'punti' && map.isSourceLoaded('punti')) aggiornaSegnapunti();
+    });
   });
   AVVISI.forEach(function (a) {
     var el = document.createElement('div');

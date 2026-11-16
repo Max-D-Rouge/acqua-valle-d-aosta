@@ -4,7 +4,14 @@ import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Tex
 
 import { useFoto } from '@/hooks/use-foto';
 import { useSessione } from '@/hooks/use-sessione';
+import { supabase } from '@/lib/supabase';
 import { caricaFoto, controllaArea, eliminaFoto, MAX_FOTO_PER_PUNTO, RAGGIO_AREA_M, scattaFoto, urlFoto, type Foto } from '@/lib/foto';
+
+const MOTIVI_FOTO = [
+  { valore: 'non_e_il_punto', etichetta: 'Non è questo punto' },
+  { valore: 'persone_riconoscibili', etichetta: 'Persone riconoscibili' },
+  { valore: 'inappropriata', etichetta: 'Inappropriata' },
+];
 
 // Foto del punto: miniature in fila, tocco per ingrandire, pulsanti per aggiungerne (solo se collegato).
 export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number; lon: number }) {
@@ -13,6 +20,8 @@ export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number;
   const [inCorso, setInCorso] = useState(false);
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [aperta, setAperta] = useState<Foto | null>(null);
+  const [segnalando, setSegnalando] = useState(false);
+  const [esitoSegnalazione, setEsitoSegnalazione] = useState<string | null>(null);
 
   async function aggiungi() {
     setMessaggio(null);
@@ -55,13 +64,22 @@ export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number;
 
   const piene = foto.length >= MAX_FOTO_PER_PUNTO;
 
+  // Segnalazione di una foto: si sceglie il motivo e la riga va nella tabella segnalazioni_foto (database/13).
+  async function segnala(f: Foto, motivo: string) {
+    setSegnalando(false);
+    const { error } = await supabase.from('segnalazioni_foto').insert({ foto_id: f.id, motivo });
+    if (!error) setEsitoSegnalazione('Segnalazione inviata agli amministratori. Grazie.');
+    else if (error.code === '23505') setEsitoSegnalazione('Hai già segnalato questa foto.');
+    else setEsitoSegnalazione(`Non inviata: ${error.message}`);
+  }
+
   return (
     <View style={styles.contenitore}>
       <Text style={styles.titolo}>Foto</Text>
       {foto.length > 0 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled contentContainerStyle={styles.fila}>
           {foto.map((f) => (
-            <Pressable key={f.id} onPress={() => setAperta(f)}>
+            <Pressable key={f.id} onPress={() => { setSegnalando(false); setEsitoSegnalazione(null); setAperta(f); }}>
               <Image source={{ uri: urlFoto(f.percorso, true) }} style={styles.miniatura} contentFit="cover" />
             </Pressable>
           ))}
@@ -98,6 +116,24 @@ export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number;
               </Pressable>
             ) : null}
           </View>
+          {aperta && sessione?.user.id && aperta.autore !== sessione.user.id ? (
+            <View style={styles.segnala}>
+              {segnalando ? (
+                <View style={styles.motivi}>
+                  {MOTIVI_FOTO.map((m) => (
+                    <Pressable key={m.valore} style={styles.motivo} onPress={() => segnala(aperta, m.valore)}>
+                      <Text style={styles.testoMotivo}>{m.etichetta}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <Pressable onPress={() => setSegnalando(true)}>
+                  <Text style={styles.linkSegnala}>Segnala questa foto</Text>
+                </Pressable>
+              )}
+              {esitoSegnalazione ? <Text style={styles.esitoSegnalazione}>{esitoSegnalazione}</Text> : null}
+            </View>
+          ) : null}
         </View>
       </Modal>
     </View>
@@ -118,4 +154,10 @@ const styles = StyleSheet.create({
   sfondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', padding: 16, gap: 16 },
   grande: { width: '100%', height: '75%' },
   azioni: { flexDirection: 'row', gap: 8 },
+  segnala: { gap: 8, alignItems: 'center' },
+  motivi: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
+  motivo: { borderWidth: 1, borderColor: '#ffffff', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },
+  testoMotivo: { color: '#ffffff', fontSize: 13 },
+  linkSegnala: { color: '#ffffff', fontSize: 14, textDecorationLine: 'underline' },
+  esitoSegnalazione: { color: '#ffffff', fontSize: 13 },
 });
