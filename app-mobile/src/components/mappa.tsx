@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import type { Avviso } from '@/data/avvisi';
+import { CONFINE_VDA } from '@/data/confine-vda';
 import { ICONE_PUNTI } from '@/data/icone-punti';
 import type { PuntoAcqua } from '@/data/punti';
 
@@ -43,6 +44,7 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
   const datiAvvisi = JSON.stringify(avvisi).replace(/</g, '\\u003c');
   const colori = JSON.stringify(COLORI);
   const icone = JSON.stringify(ICONE_PUNTI);
+  const confine = JSON.stringify(CONFINE_VDA);
   return `<!doctype html>
 <html>
 <head>
@@ -69,6 +71,7 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
   var AVVISI = ${datiAvvisi};
   var COLORI = ${colori};
   var ICONE = ${icone};
+  var CONFINE = ${confine};
   function invia(messaggio) {
     window.ReactNativeWebView.postMessage(JSON.stringify(messaggio));
   }
@@ -136,6 +139,16 @@ function creaHtml(punti: PuntoAcqua[], avvisi: Avviso[]) {
     segnapunti = nuovi;
   }
   map.on('load', function () {
+    // Confine della Valle d'Aosta (semplificato, circa 100 m): linea blu tratteggiata.
+    map.addSource('confine', {
+      type: 'geojson',
+      data: { type: 'Feature', geometry: { type: 'LineString', coordinates: CONFINE } }
+    });
+    map.addLayer({
+      id: 'confine-linea', type: 'line', source: 'confine',
+      layout: { 'line-join': 'round' },
+      paint: { 'line-color': '#18395a', 'line-width': 2.5, 'line-dasharray': [3, 2], 'line-opacity': 0.8 }
+    });
     map.addSource('punti', {
       type: 'geojson',
       cluster: true,
