@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import type { StatoNavigazione } from '@/hooks/use-navigazione';
 import { formattaDistanza, formattaDurata, type Percorso } from '@/lib/percorso';
 
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     top: 60,
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#18395a',
+    backgroundColor: Palette.secondario,
     borderRadius: 16,
     padding: Spacing.three,
     gap: 4,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   distanza: { color: '#9ec5ff', fontSize: 22, fontWeight: '700' },
-  istruzione: { color: '#ffffff', fontSize: 20, fontWeight: '600' },
+  istruzione: { color: Palette.superficie, fontSize: 20, fontWeight: '600' },
   basso: {
     position: 'absolute',
     left: Spacing.three,
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    backgroundColor: '#ffffff',
+    backgroundColor: Palette.superficie,
     borderRadius: 16,
     padding: Spacing.three,
     shadowColor: '#000',
@@ -96,9 +96,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
-  riepilogo: { fontSize: 18, fontWeight: '700', color: '#18395a' },
+  riepilogo: { fontSize: 18, fontWeight: '700', color: Palette.secondario },
   nota: { fontSize: 13, color: '#9ec5ff' },
-  notaBasso: { fontSize: 13, color: '#6b7680' },
-  termina: { backgroundColor: '#d64545', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
-  testoTermina: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  notaBasso: { fontSize: 13, color: Palette.testoTenue },
+  termina: { backgroundColor: Palette.pericolo, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20 },
+  testoTermina: { color: Palette.superficie, fontSize: 16, fontWeight: '700' },
 });

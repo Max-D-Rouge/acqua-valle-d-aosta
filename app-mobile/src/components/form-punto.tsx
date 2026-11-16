@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import type { Potabilita, TipoPunto } from '@/data/punti';
 import { caricaFile, collegaFoto, controllaArea, RAGGIO_AREA_M, scartaFile, scattaFoto, type FotoScelta } from '@/lib/foto';
 import { cercaLuogo } from '@/lib/luogo';
@@ -223,15 +223,15 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
           <Scegli etichetta="Tipo *" opzioni={TIPI} valore={tipo} onCambia={setTipo} />
 
           <Text style={styles.etichetta}>Nome (facoltativo)</Text>
-          <TextInput style={styles.campo} placeholder="Es. Fontana della piazza" placeholderTextColor="#7a8590" maxLength={80} value={nome} onChangeText={setNome} />
+          <TextInput style={styles.campo} placeholder="Es. Fontana della piazza" placeholderTextColor={Palette.testoSfumato} maxLength={80} value={nome} onChangeText={setNome} />
 
           <Text style={styles.nota}>
             {cercando ? 'Cerco comune e frazione...' : 'Comune e frazione sono letti da OpenStreetMap: correggili se sono sbagliati.'}
           </Text>
           <Text style={styles.etichetta}>Comune (facoltativo)</Text>
-          <TextInput style={styles.campo} placeholder="Es. Châtillon" placeholderTextColor="#7a8590" maxLength={80} value={comune} onChangeText={setComune} />
+          <TextInput style={styles.campo} placeholder="Es. Châtillon" placeholderTextColor={Palette.testoSfumato} maxLength={80} value={comune} onChangeText={setComune} />
           <Text style={styles.etichetta}>Frazione (facoltativa)</Text>
-          <TextInput style={styles.campo} placeholder="Es. Panorama" placeholderTextColor="#7a8590" maxLength={80} value={frazione} onChangeText={setFrazione} />
+          <TextInput style={styles.campo} placeholder="Es. Panorama" placeholderTextColor={Palette.testoSfumato} maxLength={80} value={frazione} onChangeText={setFrazione} />
 
           <Scegli etichetta="L'acqua è potabile?" opzioni={POTABILITA} valore={potabile} onCambia={setPotabile} />
           <Scegli etichetta="Funziona?" opzioni={STATI} valore={stato} onCambia={setStato} />
@@ -240,7 +240,7 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
           <Scegli etichetta="Accessibile in carrozzina?" opzioni={SI_NO} valore={carrozzina} onCambia={setCarrozzina} />
           <Scegli etichetta="Stagionalità" opzioni={STAGIONI} valore={stagionalita} onCambia={setStagionalita} />
           {stagionalita === 'stagionale' ? (
-            <TextInput style={styles.campo} placeholder="Es. aperta da giugno a settembre" placeholderTextColor="#7a8590" maxLength={200} value={notaStagione} onChangeText={setNotaStagione} />
+            <TextInput style={styles.campo} placeholder="Es. aperta da giugno a settembre" placeholderTextColor={Palette.testoSfumato} maxLength={200} value={notaStagione} onChangeText={setNotaStagione} />
           ) : null}
 
           <Text style={styles.etichetta}>Foto del punto *</Text>
@@ -257,7 +257,7 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
           <TextInput
             style={[styles.campo, styles.campoLungo]}
             placeholder="Come raggiungerla, note utili"
-            placeholderTextColor="#7a8590"
+            placeholderTextColor={Palette.testoSfumato}
             multiline
             maxLength={500}
             value={descrizione}
@@ -279,24 +279,24 @@ export function FormPunto({ visibile, posizione, onChiudi, onSalvato }: Props) {
 }
 
 const styles = StyleSheet.create({
-  sfondo: { flex: 1, backgroundColor: '#f7f5f2' },
+  sfondo: { flex: 1, backgroundColor: Palette.sfondo },
   contenuto: { padding: Spacing.four, paddingTop: 60, paddingBottom: 80, gap: Spacing.two },
-  titolo: { fontSize: 24, fontWeight: '700', color: '#18395a' },
-  nota: { fontSize: 14, color: '#4a5560', marginBottom: Spacing.two },
-  etichetta: { fontSize: 15, fontWeight: '600', color: '#18395a', marginTop: Spacing.two },
-  campo: { borderWidth: 1, borderColor: '#c5ccd3', borderRadius: 10, padding: Spacing.three, fontSize: 16, backgroundColor: '#ffffff', color: '#18395a' },
+  titolo: { fontSize: 24, fontWeight: '700', color: Palette.secondario },
+  nota: { fontSize: 14, color: Palette.testo, marginBottom: Spacing.two },
+  etichetta: { fontSize: 15, fontWeight: '600', color: Palette.secondario, marginTop: Spacing.two },
+  campo: { borderWidth: 1, borderColor: Palette.bordo, borderRadius: 10, padding: Spacing.three, fontSize: 16, backgroundColor: Palette.superficie, color: Palette.secondario },
   campoLungo: { minHeight: 80, textAlignVertical: 'top' },
   riga: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  scelta: { borderWidth: 1, borderColor: '#18395a', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: '#ffffff' },
-  sceltaAttiva: { backgroundColor: '#18395a' },
-  testoScelta: { color: '#18395a', fontSize: 15 },
-  testoSceltaAttiva: { color: '#ffffff' },
-  messaggio: { backgroundColor: '#fff3cd', borderRadius: 8, padding: Spacing.two, color: '#5c4400', marginTop: Spacing.two },
-  pulsante: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: Spacing.three },
+  scelta: { borderWidth: 1, borderColor: Palette.secondario, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: Palette.superficie },
+  sceltaAttiva: { backgroundColor: Palette.secondario },
+  testoScelta: { color: Palette.secondario, fontSize: 15 },
+  testoSceltaAttiva: { color: Palette.superficie },
+  messaggio: { backgroundColor: Palette.avvisoSfondo, borderRadius: 8, padding: Spacing.two, color: Palette.avvisoTesto, marginTop: Spacing.two },
+  pulsante: { backgroundColor: Palette.secondario, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: Spacing.three },
   disattivo: { opacity: 0.5 },
-  testoPulsante: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  testoPulsante: { color: Palette.superficie, fontSize: 16, fontWeight: '600' },
   anteprima: { width: '100%', height: 200, borderRadius: 12, backgroundColor: '#e5edf3' },
-  scatta: { borderWidth: 1, borderColor: '#18395a', borderRadius: 12, paddingVertical: 12, alignItems: 'center', backgroundColor: '#ffffff' },
-  testoScatta: { color: '#18395a', fontSize: 16, fontWeight: '600' },
-  link: { color: '#18395a', textAlign: 'center', fontSize: 15, textDecorationLine: 'underline', marginTop: Spacing.two },
+  scatta: { borderWidth: 1, borderColor: Palette.secondario, borderRadius: 12, paddingVertical: 12, alignItems: 'center', backgroundColor: Palette.superficie },
+  testoScatta: { color: Palette.secondario, fontSize: 16, fontWeight: '600' },
+  link: { color: Palette.secondario, textAlign: 'center', fontSize: 15, textDecorationLine: 'underline', marginTop: Spacing.two },
 });

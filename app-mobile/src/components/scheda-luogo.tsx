@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import { cercaInfo, type InfoLuogo } from '@/lib/info-luogo';
-import { apriMezzi } from '@/lib/mappe-esterne';
 import type { Mezzo } from '@/lib/percorso';
 
 export type LuogoMappa = { nome: string; classe?: string; sottoclasse?: string; lat: number; lon: number };
@@ -60,9 +59,6 @@ export function SchedaLuogo({ luogo, bottom, onPercorso, onChiudi }: Props) {
         <Pressable style={[styles.pulsante, styles.blu]} onPress={() => onPercorso(luogo, 'auto')}>
           <Text style={styles.testo}>🚗 In auto</Text>
         </Pressable>
-        <Pressable style={[styles.pulsante, styles.verde]} onPress={() => apriMezzi(luogo.lat, luogo.lon)}>
-          <Text style={styles.testo}>🚌 Mezzi</Text>
-        </Pressable>
       </View>
 
       {info === undefined ? (
@@ -99,7 +95,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#ffffff',
+    backgroundColor: Palette.superficie,
     borderRadius: 16,
     borderLeftWidth: 6,
     borderLeftColor: '#f59e0b',
@@ -111,16 +107,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
-  nome: { fontSize: 18, fontWeight: '700', color: '#18395a' },
-  categoria: { fontSize: 14, color: '#4a5560' },
+  nome: { fontSize: 18, fontWeight: '700', color: Palette.secondario },
+  categoria: { fontSize: 14, color: Palette.testo },
   riga: { flexDirection: 'row', gap: 8, marginTop: 4 },
   pulsante: { flex: 1, borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-  blu: { backgroundColor: '#2563eb' },
-  verde: { backgroundColor: '#1f9d55' },
-  scuro: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
-  testo: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
-  dato: { fontSize: 14, color: '#18395a' },
-  link: { color: '#2563eb', textDecorationLine: 'underline' },
-  nota: { fontSize: 12, color: '#6b7680' },
-  chiudi: { color: '#d64545', textAlign: 'center', fontSize: 14, textDecorationLine: 'underline', marginTop: 4 },
+  blu: { backgroundColor: Palette.accento },
+  scuro: { backgroundColor: Palette.secondario, borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
+  testo: { color: Palette.superficie, fontSize: 15, fontWeight: '700' },
+  dato: { fontSize: 14, color: Palette.secondario },
+  link: { color: Palette.accento, textDecorationLine: 'underline' },
+  nota: { fontSize: 12, color: Palette.testoTenue },
+  chiudi: { color: Palette.pericolo, textAlign: 'center', fontSize: 14, textDecorationLine: 'underline', marginTop: 4 },
 });

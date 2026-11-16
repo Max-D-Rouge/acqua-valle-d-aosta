@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
+import { testoBlocco, useBlocco } from '@/hooks/use-blocco';
 import { useSessione } from '@/hooks/use-sessione';
 import { supabase } from '@/lib/supabase';
 
@@ -21,6 +22,7 @@ const MOTIVI = [
 // "Segnala questo utente": il messaggio arriva agli amministratori (database/08), l'email dell'utente non viene mai mostrata.
 export function SegnalaUtente({ utenteId, puntoId }: Props) {
   const { sessione } = useSessione();
+  const { fino: bloccoFino } = useBlocco(sessione?.user.id ?? null);
   const [aperto, setAperto] = useState(false);
   const [motivo, setMotivo] = useState('informazioni_false');
   const [messaggio, setMessaggio] = useState('');
@@ -29,6 +31,7 @@ export function SegnalaUtente({ utenteId, puntoId }: Props) {
 
   // Solo chi è collegato può segnalare, e non se stesso.
   if (!sessione || sessione.user.id === utenteId) return null;
+  if (bloccoFino) return <Text style={styles.esito}>{testoBlocco(bloccoFino)}</Text>;
 
   async function invia() {
     setOccupato(true);
@@ -66,7 +69,7 @@ export function SegnalaUtente({ utenteId, puntoId }: Props) {
           <TextInput
             style={styles.campo}
             placeholder="Cosa è successo? (facoltativo)"
-            placeholderTextColor="#7a8590"
+            placeholderTextColor={Palette.testoSfumato}
             multiline
             maxLength={500}
             value={messaggio}
@@ -84,16 +87,16 @@ export function SegnalaUtente({ utenteId, puntoId }: Props) {
 
 const styles = StyleSheet.create({
   box: { marginTop: 4, gap: 6 },
-  link: { fontSize: 13, color: '#b45309', textDecorationLine: 'underline' },
+  link: { fontSize: 13, color: Palette.avviso, textDecorationLine: 'underline' },
   modulo: { gap: 8, marginTop: 4 },
   riga: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  scelta: { borderWidth: 1, borderColor: '#b45309', borderRadius: 16, paddingVertical: 5, paddingHorizontal: 10, backgroundColor: '#ffffff' },
-  sceltaAttiva: { backgroundColor: '#b45309' },
-  testoScelta: { fontSize: 13, color: '#b45309' },
-  testoSceltaAttiva: { color: '#ffffff', fontWeight: '600' },
-  campo: { borderWidth: 1, borderColor: '#c5ccd3', borderRadius: 10, padding: Spacing.two, fontSize: 14, backgroundColor: '#ffffff', color: '#18395a', minHeight: 60, textAlignVertical: 'top' },
-  invia: { backgroundColor: '#b45309', borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+  scelta: { borderWidth: 1, borderColor: Palette.avviso, borderRadius: 16, paddingVertical: 5, paddingHorizontal: 10, backgroundColor: Palette.superficie },
+  sceltaAttiva: { backgroundColor: Palette.avviso },
+  testoScelta: { fontSize: 13, color: Palette.avviso },
+  testoSceltaAttiva: { color: Palette.superficie, fontWeight: '600' },
+  campo: { borderWidth: 1, borderColor: Palette.bordo, borderRadius: 10, padding: Spacing.two, fontSize: 14, backgroundColor: Palette.superficie, color: Palette.secondario, minHeight: 60, textAlignVertical: 'top' },
+  invia: { backgroundColor: Palette.avviso, borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
   spento: { opacity: 0.5 },
-  testoInvia: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
-  esito: { fontSize: 13, color: '#4a5560' },
+  testoInvia: { color: Palette.superficie, fontSize: 14, fontWeight: '700' },
+  esito: { fontSize: 13, color: Palette.testo },
 });

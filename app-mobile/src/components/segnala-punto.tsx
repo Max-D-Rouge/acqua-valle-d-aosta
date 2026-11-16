@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
+import { testoBlocco, useBlocco } from '@/hooks/use-blocco';
 import { useSessione } from '@/hooks/use-sessione';
 import { supabase } from '@/lib/supabase';
 
@@ -35,6 +36,7 @@ export function SegnalaPunto({ puntoId, onFatto }: Props) {
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
   const utente = sessione?.user.id ?? null;
+  const { fino: bloccoFino } = useBlocco(utente);
 
   // Legge i voti già dati su questo punto e preseleziona i voti dell'utente.
   const caricaVoti = useCallback(async () => {
@@ -101,7 +103,7 @@ export function SegnalaPunto({ puntoId, onFatto }: Props) {
         return (
           <View key={d.campo} style={styles.domandaBox}>
             <Text style={styles.domanda}>{d.domanda}</Text>
-            {utente ? (
+            {utente && !bloccoFino ? (
               <View style={styles.riga}>
                 {d.risposte.map((o) => {
                   const attiva = scelte[d.campo] === o.valore;
@@ -117,7 +119,9 @@ export function SegnalaPunto({ puntoId, onFatto }: Props) {
           </View>
         );
       })}
-      {utente ? (
+      {utente && bloccoFino ? (
+        <Text style={styles.accedi}>{testoBlocco(bloccoFino)}</Text>
+      ) : utente ? (
         <Pressable style={[styles.invia, (occupato || Object.keys(scelte).length === 0) && styles.inviaSpento]} disabled={occupato || Object.keys(scelte).length === 0} onPress={invia}>
           <Text style={styles.testoInvia}>{occupato ? 'Invio...' : `Invia segnalazione (${Object.keys(scelte).length})`}</Text>
         </Pressable>
@@ -133,17 +137,17 @@ const styles = StyleSheet.create({
   box: { marginTop: Spacing.two, gap: 12 },
   domandaBox: { gap: 6 },
   riga: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  domanda: { fontSize: 14, fontWeight: '600', color: '#18395a' },
-  bottone: { borderWidth: 1, borderColor: '#18395a', borderRadius: 18, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#ffffff' },
-  bottoneAttivo: { backgroundColor: '#18395a' },
-  testo: { fontSize: 14, color: '#18395a' },
-  testoAttivo: { color: '#ffffff', fontWeight: '600' },
-  voti: { fontSize: 12, color: '#6b7680' },
+  domanda: { fontSize: 14, fontWeight: '600', color: Palette.secondario },
+  bottone: { borderWidth: 1, borderColor: Palette.secondario, borderRadius: 18, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: Palette.superficie },
+  bottoneAttivo: { backgroundColor: Palette.secondario },
+  testo: { fontSize: 14, color: Palette.secondario },
+  testoAttivo: { color: Palette.superficie, fontWeight: '600' },
+  voti: { fontSize: 12, color: Palette.testoTenue },
   votiOk: { color: '#17703f' },
-  votiDiversi: { color: '#b45309' },
-  invia: { backgroundColor: '#1f9d55', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  votiDiversi: { color: Palette.avviso },
+  invia: { backgroundColor: Palette.ok, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   inviaSpento: { backgroundColor: '#a9b3bc' },
-  testoInvia: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
-  messaggio: { fontSize: 13, color: '#4a5560' },
-  accedi: { fontSize: 13, color: '#4a5560' },
+  testoInvia: { color: Palette.superficie, fontSize: 15, fontWeight: '700' },
+  messaggio: { fontSize: 13, color: Palette.testo },
+  accedi: { fontSize: 13, color: Palette.testo },
 });

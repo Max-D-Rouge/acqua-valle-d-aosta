@@ -6,6 +6,12 @@ La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà cr
 
 ## [Non rilasciato] - app Expo (`app-mobile/`, ramo `dev-studente-A`)
 
+- Database: `15_confine_vero_postgis.sql` (controllo col confine vero della Valle d'Aosta con PostGIS, al posto del rettangolo) e relativa prova. Eseguito su Supabase e provato (14/14) (D38).
+
+- Percorso a piedi: avviso con i metri di statale e il tratto più lungo (avviso forte se lungo), pulsante per scegliere tra percorso diretto e alternativo che evita la statale (D36). Provato sul telefono da Max.
+
+- Colori dell'app raccolti in `Palette` (`constants/theme.ts`), senza cambiare l'aspetto (D39). Provato sul telefono da Max.
+
 ### Aggiunto (2026-11-06 / 2026-11-09)
 - Accesso, registrazione e uscita con email e password tramite Supabase Auth; la sessione resta salvata sul telefono (schermata Profilo, sostituisce la demo "Explore").
 - Menu a ventaglio in basso a sinistra con le azioni "Dove sono" e "Aggiungi punto".
@@ -59,3 +65,5 @@ La prima versione (0.1.0) verrà registrata quando il progetto dell'app sarà cr
 ## Modificato (2026-11-16) - da provare
 - Segnaposto dei punti: icone per tipo (fontana, fontanella, sorgente, struttura, altro) e stato (potabile, non potabile, non verificato).
 - Raggruppamento dei punti vicini in cerchi con il numero (2026-11-16), da provare.
+- Rimosso (2026-11-16): il pulsante "Mezzi" (apriva l'app mappe in modalità trasporto pubblico). L'app si usa a piedi o in auto.
+- Blocco utenti e valutazione segnalazioni (SQL 14, 2026-11-16): scritto, NON eseguito né provato.

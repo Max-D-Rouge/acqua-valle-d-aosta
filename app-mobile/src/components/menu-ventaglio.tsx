@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { BottomTabInset } from '@/constants/theme';
+import { BottomTabInset, Palette } from '@/constants/theme';
 
 export type Azione = {
   chiave: string;
@@ -11,7 +11,7 @@ export type Azione = {
 };
 
 // Colori provvisori dell'app (il logo è ancora in modifica): si cambiano solo qui.
-const NAVY = '#18395a';
+const NAVY = Palette.secondario;
 const CIELO = '#7dd3fc';
 const GHIACCIO = '#e0f7ff';
 
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   // Il testo va controruotato, altrimenti seguirebbe la rotazione della goccia.
-  simbolo: { color: '#ffffff', fontSize: 24, fontWeight: '700', transform: [{ rotate: '-45deg' }] },
+  simbolo: { color: Palette.superficie, fontSize: 24, fontWeight: '700', transform: [{ rotate: '-45deg' }] },
   azione: { position: 'absolute', width: 96, alignItems: 'center', gap: 6 },
   gocciaAzione: {
     width: DIM_AZIONE,
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   },
   simboloAzione: { color: NAVY, fontSize: 22, fontWeight: '700', transform: [{ rotate: '-45deg' }] },
   etichetta: {
-    color: '#ffffff',
+    color: Palette.superficie,
     fontSize: 12,
     fontWeight: '600',
     backgroundColor: NAVY,

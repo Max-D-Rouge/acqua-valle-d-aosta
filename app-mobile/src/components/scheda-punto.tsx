@@ -4,9 +4,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FotoPunto } from '@/components/foto-punto';
 import { SegnalaPunto } from '@/components/segnala-punto';
 import { SegnalaUtente } from '@/components/segnala-utente';
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import type { Potabilita, PuntoAcqua, TipoPunto } from '@/data/punti';
-import { apriMezzi } from '@/lib/mappe-esterne';
 import type { Mezzo } from '@/lib/percorso';
 import { supabase } from '@/lib/supabase';
 
@@ -21,8 +20,8 @@ type Props = {
 
 // Stesso verde / rosso / grigio dei pallini sulla mappa (mappa.tsx).
 const POTABILITA: Record<Potabilita, { colore: string; chiaro: string; etichetta: string }> = {
-  potabile: { colore: '#1f9d55', chiaro: '#e3f4ea', etichetta: 'Indicata come potabile' },
-  non_potabile: { colore: '#d64545', chiaro: '#fbe7e7', etichetta: 'Indicata come NON potabile' },
+  potabile: { colore: Palette.ok, chiaro: '#e3f4ea', etichetta: 'Indicata come potabile' },
+  non_potabile: { colore: Palette.pericolo, chiaro: '#fbe7e7', etichetta: 'Indicata come NON potabile' },
   non_verificato: { colore: '#8a94a0', chiaro: '#eceff2', etichetta: 'Potabilità non verificata' },
 };
 
@@ -99,9 +98,6 @@ export function SchedaPunto({ punto, ricarica, bottom, onPercorso }: Props) {
         <Pressable style={[styles.percorso, styles.meta]} onPress={() => onPercorso(punto, 'auto')}>
           <Text style={styles.testoPortami}>🚗 In auto</Text>
         </Pressable>
-        <Pressable style={[styles.portami, styles.meta]} onPress={() => apriMezzi(punto.lat, punto.lon)}>
-          <Text style={styles.testoPortami}>🚌 Mezzi</Text>
-        </Pressable>
       </View>
 
       <Pressable style={styles.pulsante} onPress={() => setAperta(!aperta)}>
@@ -140,7 +136,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#ffffff',
+    backgroundColor: Palette.superficie,
     borderRadius: 16,
     borderLeftWidth: 6,
     padding: Spacing.three,
@@ -151,32 +147,31 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
-  nome: { fontSize: 18, fontWeight: '700', color: '#18395a' },
-  sottotitolo: { fontSize: 14, color: '#4a5560' },
+  nome: { fontSize: 18, fontWeight: '700', color: Palette.secondario },
+  sottotitolo: { fontSize: 14, color: Palette.testo },
   badge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
   pallino: { width: 10, height: 10, borderRadius: 5 },
   testoBadge: { fontSize: 13, fontWeight: '700' },
   rigaPercorsi: { flexDirection: 'row', gap: 8, marginTop: 4 },
   meta: { flex: 1 },
-  portami: { backgroundColor: '#1f9d55', borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-  percorso: { backgroundColor: '#2563eb', borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-  testoPortami: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
-  pulsante: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
-  testoPulsante: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
+  percorso: { backgroundColor: Palette.accento, borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
+  testoPortami: { color: Palette.superficie, fontSize: 15, fontWeight: '700' },
+  pulsante: { backgroundColor: Palette.secondario, borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
+  testoPulsante: { color: Palette.superficie, fontSize: 15, fontWeight: '600' },
   dettagli: { maxHeight: 340, marginTop: 4 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
   chipOk: { backgroundColor: '#e3f4ea' },
-  chipNo: { backgroundColor: '#fff3cd' },
+  chipNo: { backgroundColor: Palette.avvisoSfondo },
   testoChip: { fontSize: 13, fontWeight: '600' },
   testoChipOk: { color: '#17703f' },
   testoChipNo: { color: '#7a5a00' },
-  vuoto: { fontSize: 14, color: '#4a5560' },
-  descrizione: { fontSize: 14, color: '#4a5560', marginTop: 8 },
+  vuoto: { fontSize: 14, color: Palette.testo },
+  descrizione: { fontSize: 14, color: Palette.testo, marginTop: 8 },
   daControllare: { alignSelf: 'flex-start', backgroundColor: '#ffedd5', borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
-  testoDaControllare: { fontSize: 13, fontWeight: '700', color: '#b45309' },
-  avvisoAutore: { fontSize: 13, color: '#b45309', backgroundColor: '#ffedd5', borderRadius: 8, padding: 8, marginTop: 8 },
-  autore: { fontSize: 13, color: '#4a5560', marginTop: 6 },
-  titolo: { fontSize: 14, fontWeight: '700', color: '#18395a', marginTop: 12 },
-  avviso: { fontSize: 12, color: '#7a5a00', backgroundColor: '#fff3cd', borderRadius: 8, padding: 8, marginTop: 10 },
+  testoDaControllare: { fontSize: 13, fontWeight: '700', color: Palette.avviso },
+  avvisoAutore: { fontSize: 13, color: Palette.avviso, backgroundColor: '#ffedd5', borderRadius: 8, padding: 8, marginTop: 8 },
+  autore: { fontSize: 13, color: Palette.testo, marginTop: 6 },
+  titolo: { fontSize: 14, fontWeight: '700', color: Palette.secondario, marginTop: 12 },
+  avviso: { fontSize: 12, color: '#7a5a00', backgroundColor: Palette.avvisoSfondo, borderRadius: 8, padding: 8, marginTop: 10 },
 });

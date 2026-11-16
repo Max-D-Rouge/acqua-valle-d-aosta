@@ -877,10 +877,9 @@ Nessuno (da fare a cura di Max).
 
 ### 2026-11-10 (12:05-13:14) - Navigazione, modalità di viaggio, statale, strumento mappa (Studente A, con Claude)
 - Obiettivo: far funzionare il percorso come un navigatore, scegliere come arrivare, evitare la statale a piedi.
-- Nuovi: `lib/geo.ts`, `hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `strumenti/mappa_sentieri.py`. Modificati: `lib/percorso.ts` (modalità piedi/auto, riconoscimento statale, ricalcolo con zone da evitare, messaggi `[percorso]`), `components/scheda-percorso.tsx`, `scheda-punto.tsx` (pulsanti A piedi / In auto / Mezzi), `mappa.tsx`, `app/index.tsx`.
-- Test: `npx tsc --noEmit` solo i 2 errori già noti. Sul telefono Max ha visto il percorso e la schermata di navigazione; la navigazione camminando, il ricalcolo, la modalità auto e Mezzi NON sono provati.
+- Nuovi: `lib/geo.ts`, `hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `strumenti/mappa_sentieri.py`. Modificati: `lib/percorso.ts` (modalità piedi/auto, riconoscimento statale, ricalcolo con zone da evitare, messaggi `[percorso]`), `components/scheda-percorso.tsx`, `scheda-punto.tsx` (pulsanti A piedi / In auto (il pulsante Mezzi, tolto il 2026-11-16, vedi D35)), `mappa.tsx`, `app/index.tsx`.
+- Test: `npx tsc --noEmit` solo i 2 errori già noti. Sul telefono Max ha visto il percorso e la schermata di navigazione; la navigazione camminando, il ricalcolo, la modalità auto NON sono provati.
 - Problema: il percorso passa ancora sulla statale (PS-003, aperto). Lo strumento `mappa_sentieri.py` (Max lo ha eseguito dal Terminale) ha scaricato i dati OSM della zona Aosta-Verrès; Claude ha calcolato che senza statale servono circa 42,1 km.
-- Mezzi pubblici: nessun dato aperto trovato; il PDF della linea 110 è del 01.06.2025. Nessuna implementazione.
 - Imparato: la distanza più breve non è quella sicura per un pedone; un servizio di routing dipende dai dati OSM e li possiamo controllare e correggere.
 - Da fare: leggere i messaggi `[percorso]`, decidere tra limite di distanza e avviso (D33), eventuale linea 110.
 
@@ -934,3 +933,66 @@ Nessuno (da fare a cura di Max).
 - Modificato: `app-mobile/src/components/mappa.tsx`: sorgente GeoJSON `punti` con `cluster: true` (raggio 50 px, raggruppa fino a zoom 16); i segnaposto (icone e cerchi) restano elementi HTML aggiornati a fine movimento e al caricamento dei dati; diametro cerchio = 34 + radice(n) x 7 px, massimo 72; il tocco su un cerchio zooma per aprirlo.
 - Test: `tsc` ok (solo i 2 errori noti), sintassi della pagina web controllata con `node --check`. Prova sul telefono: DA FARE (Max). Non so ancora come si comporta con molti punti reali.
 - Limiti noti: i cerchi non cambiano colore in base allo stato dei punti contenuti; durante lo zoom con le dita i segnaposto si aggiornano solo a fine movimento.
+
+## 2026-11-16 (14:25) - Studente B (Mayo, riferito da Max) - Prima prova dopo il merge
+- Mayo ha unito `8fc91a1` (fast-forward, nessun conflitto), `npm install` ok, app aperta con Expo Go su iPhone.
+- Provato e funzionante (riferito da Mayo, non verificato da me): nuove icone dei punti, raggruppamento in cerchi con numero e zoom al tocco, pulsanti satellite e 3D.
+- NON provato: segnalazione foto (a Mayo mancava `13_segnalazioni_foto.sql`; Max l'ha eseguito il 2026-11-16 14:23) e navigazione (a Mayo manca `EXPO_PUBLIC_ORS_API_KEY` nel `.env`).
+- Prossimo: Mayo passa all'emulatore Android; poi prova di segnalazione foto e navigazione.
+
+## 2026-11-16 (14:30) - Studente A (Max) - Esito della prova
+- Max riferisce che icone, raggruppamento e il resto "funzionano tutto" sul suo telefono (dettaglio per singola funzione, segnalazione foto compresa, non specificato).
+- SQL 13 eseguito da Max (14:23). Mayo: icone, raggruppamento, satellite e 3D ok su iPhone; mancano navigazione (chiave ORS) e segnalazione foto; Android da provare.
+
+## 2026-11-16 (14:35-15:00) - Studente A (Max) - Decisioni su statale e blocchi
+- Decisioni di Max: D36 (statale/marciapiedi, poi scartata), D37 (blocco utenti). Vedi DECISIONI_TECNICHE.md.
+- Creati: `database/14_ban_e_valutazione_segnalazioni.sql`, `app-mobile/src/hooks/use-blocco.ts`.
+- Modificati: `servizi/avviso-email.gs` (registro + 3 tipi di avviso), `app/index.tsx`, `components/foto-punto.tsx`, `segnala-punto.tsx`, `segnala-utente.tsx` (messaggio all'utente bloccato), `docs/13_PROBLEMI_E_SOLUZIONI.md`.
+- Test: `tsc` ok (solo i 2 errori noti). SQL 14 NON eseguito, app NON provata, email NON provata.
+- Da fare: marciapiedi (D36), controllo confine vero (Mayo + SQL 15).
+
+## 2026-11-16 (15:30) - Studente A (Max) - Strumento per misurare i marciapiedi (D36, passo 1)
+- Creato `strumenti/marciapiedi_statali.py`: scarica da Overpass le strade trunk/primary della Valle d'Aosta e i percorsi `footway=sidewalk`, classifica ogni tratto (con marciapiede / separato / senza / non indicato), scrive un riassunto, un SVG colorato e un JSON.
+- Test: la logica di classificazione è stata provata con DATI FINTI (4 casi, risultati giusti). NON provato con Overpass (dal mio ambiente non si raggiunge): lo esegue Max dal Mac. Output nel `.gitignore`.
+- Prossimo: leggere il riassunto per decidere se i dati bastano per implementare D36.
+
+## 2026-11-16 (14:51) - Studente A (Max) - SQL 10 e 14 eseguiti
+- Al primo tentativo il 14 si era fermato con "relation public.avvisi does not exist": il file `10_avvisi.sql` non era mai stato eseguito sul database di Max (quindi gli avvisi sulla mappa non erano mai stati provati). Il 09 risultava eseguito (vincolo `punti_dentro_valle_daosta` presente).
+- Max riferisce che, dopo aver eseguito il 10 e poi il 14, "non ha dato errore". Controllo dell'esistenza degli oggetti creati e prova dei conteggi: DA FARE.
+
+## 2026-11-16 (14:56) - Studente A (Max) - Prova delle regole di blocco
+- Verificato che il SQL 14 ha creato 2 tabelle (blocchi, avvisi), 2 colonne (stato, valutata_il) e 4 trigger.
+- Eseguito `database/prove/14_prova_blocchi.sql` (utenti finti, tutto annullato): 9 controlli su 9 con esito OK (1a, 1b, 2, 3a, 3b, 3c, 4, 5a, 5b).
+- NON provati: messaggio all'utente bloccato nell'app, arrivo delle email (servizio Apps Script da ridistribuire con nuova versione), avvisi sul telefono.
+
+## 2026-11-16 (15:20) - Studente A (Max) - Confine vero: SQL 15
+- Obiettivo: rispondere a Mayo, che ha preparato il confine ISTAT 2026 (279 punti) nell'app (ramo dev-studente-B, commit becefc5).
+- File creati: `database/15_confine_vero_postgis.sql`, `database/prove/15_prova_confine.sql`. Modificato: `DECISIONI_TECNICHE.md` (D38).
+- Test: i risultati attesi della prova sono stati calcolati in Python (14 località); il SQL NON è ancora stato eseguito su Supabase.
+- Da fare: Max esegue 15 e poi la prova; si fa il merge del ramo di Mayo.
+
+## 2026-11-16 (15:40) - Studente A (Max) - Statale a piedi: avviso e alternativa (D36)
+- Dall'analisi OpenStreetMap il 91% dei tratti non indica il marciapiede: la regola "solo dove c'è il marciapiede" non è realizzabile.
+- Decisione di Max: avviso con metri di statale, avviso forte sui tratti lunghi, percorso alternativo sempre proposto, e in più rilievi nostri dei marciapiedi su OSM.
+- Modificati: `lib/percorso.ts`, `components/scheda-percorso.tsx`, `app/index.tsx`. Test: tsc senza errori nuovi; NON provato sul telefono.
+- DA CONTROLLARE (Max, 2026-11-16): SQL 15 del confine con la sua prova (D38). D36 è stata provata sul telefono alle 15:45, vedi sotto.
+
+## 2026-11-16 (15:55) - Studente A (Max) - Colori raccolti in `Palette` (D39)
+- Creato `Palette` in `constants/theme.ts`; sostituiti 162 colori scritti a mano in 15 file di `app/` e `components/`.
+- Test: tsc senza errori nuovi; aspetto provato sul telefono da Max alle 15:45 (funziona).
+
+## 2026-11-16 (15:45) - Studente A (Max) - Prova sul telefono: statale e colori
+- Max ha provato sul telefono l'avviso sulla statale con il percorso alternativo (D36) e i colori della `Palette` (D39): funzionano, senza problemi segnalati.
+- Non è stato dettagliato quali percorsi sono stati provati né se l'avviso forte e il pulsante dell'alternativa sono comparsi in tutti i casi.
+- Ancora da controllare: SQL 15 del confine e la sua prova (D38), merge del ramo di Mayo.
+
+## 2026-11-16 (15:48) - Studente A (Max) - SQL 15 eseguito
+- Max ha eseguito `database/15_confine_vero_postgis.sql` su Supabase: "Success. No rows returned". Quindi nessun punto o avviso esistente era fuori dal confine vero e i vincoli sono stati sostituiti.
+- La prova `database/prove/15_prova_confine.sql` NON è ancora stata eseguita con successo (prima era stata lanciata a funzione non ancora creata, vedi PS-004).
+- 15:50 - Max ha rieseguito per errore la prova dei blocchi (`prove/14_prova_blocchi.sql`) dopo il file 15: 9 controlli su 9 superati, compreso 5b (un utente non bloccato crea un avviso con il nuovo controllo del confine). La prova del confine (`prove/15_prova_confine.sql`) resta da eseguire.
+
+## 2026-11-16 (15:52) - Studente A (Max) - Prova del confine superata (D38)
+- Max ha eseguito `database/prove/15_prova_confine.sql` su Supabase: punti sbagliati 0 su 14 (6 dentro, 7 fuori, più Cervinia dentro). PostGIS e il calcolo indipendente in Python concordano.
+- Limite: le 14 località sono lontane dal confine, tranne Cervinia; la precisione vicino al bordo (circa 100 m per la semplificazione) non è stata misurata. Non è stata provata dall'app l'aggiunta di un punto vicino al confine.
+- Fase confine (D38) per il database: eseguita e provata. Resta il merge del ramo di Mayo con la parte dell'app.
+

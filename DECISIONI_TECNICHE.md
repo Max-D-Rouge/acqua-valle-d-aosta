@@ -758,13 +758,12 @@ In attesa di decisione di Max. Per ora resta "Portami qui".
 - **Limiti noti**: il calcolo parte dalla posizione al momento del tocco; non c'è ancora la guida passo passo mentre si cammina, né il ricalcolo se si esce dal percorso.
 
 ### D33 - Aggiornamento 2026-11-10: navigazione a piedi/in auto, statale e satellite (PARTE DA RIFINIRE)
-- **Fatto**: il percorso si sceglie con tre pulsanti nella scheda del punto: A piedi (ORS `foot-hiking`), In auto (ORS `driving-car`), Mezzi (apre l'app mappe del telefono in modalità trasporto pubblico). C'è una navigazione passo passo (`hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `lib/geo.ts`): segue il GPS solo mentre è attiva, mostra la prossima indicazione, ricalcola se si resta oltre 40 m dal percorso (almeno 20 s tra un ricalcolo e l'altro), segnala l'arrivo sotto i 25 m. La posizione resta in memoria e viene mandata a ORS solo per calcolare o ricalcolare il percorso.
-- **Verificato da Max sul telefono**: il percorso viene calcolato e disegnato; la schermata di navigazione si apre (indicazione in alto, riepilogo in basso, "Termina"). NON verificato: camminando davvero (avanzamento dei passi, ricalcolo, arrivo), modalità in auto, pulsante Mezzi.
+- **Fatto**: il percorso si sceglie con due pulsanti nella scheda del punto: A piedi (ORS `foot-hiking`) e In auto (ORS `driving-car`). In origine c'era anche "Mezzi" (apriva l'app mappe in modalità trasporto pubblico): tolto il 2026-11-16, vedi D35. C'è una navigazione passo passo (`hooks/use-navigazione.ts`, `components/scheda-navigazione.tsx`, `lib/geo.ts`): segue il GPS solo mentre è attiva, mostra la prossima indicazione, ricalcola se si resta oltre 40 m dal percorso (almeno 20 s tra un ricalcolo e l'altro), segnala l'arrivo sotto i 25 m. La posizione resta in memoria e viene mandata a ORS solo per calcolare o ricalcolare il percorso.
+- **Verificato da Max sul telefono**: il percorso viene calcolato e disegnato; la schermata di navigazione si apre (indicazione in alto, riepilogo in basso, "Termina"). NON verificato: camminando davvero (avanzamento dei passi, ricalcolo, arrivo), modalità in auto.
 - **PROBLEMA APERTO - percorso a piedi sulla statale**: il percorso di prova (circa 15,5 km, SS26) passa sulla statale. Il codice (`lib/percorso.ts`) riconosce i tratti "State Road" (tipo 1 di ORS = strade OSM primary/trunk) e, se sono più di 30 m, riprova fino a 3 volte con zone da evitare; l'avviso arancione dovrebbe comparire nella scheda. Non è confermato che il ricalcolo funzioni: il percorso è rimasto lo stesso. Aggiunti messaggi `[percorso]` nel Terminale di Expo per capire la causa (non ancora letti).
 - **Controllo sui dati OSM (strumenti/mappa_sentieri.py, calcolo fatto da Claude sui dati scaricati il 2026-11-10)**: tra Aosta e Verrès esiste nei dati OSM un percorso senza primary/trunk/motorway di circa 42,1 km (contro 15,5 km sulla SS26). Il calcolo usa anche strade di servizio e sterrate che potrebbero essere private: NON verificato. Quindi evitare la statale è possibile nei dati, ma costa quasi il triplo di strada.
 - **Dubbio sul tragitto locale**: in un punto di prova il percorso fa un giro invece di usare un marciapiede visibile sulla mappa; ipotesi (non verificate): marciapiede non collegato nei dati OSM.
-- **Opzioni discusse, non decise**: (1) limite di distanza per il percorso a piedi (es. 5 km) con suggerimento di auto o mezzi; (2) avviso rosso più forte con conferma prima di avviare; (3) calcolo proprio sui dati OSM con server/PostGIS. Consigliate 1+2, in attesa di Max.
-- **Mezzi pubblici**: nessuna API pubblica trovata per l'app vdatransports (S.I.T. Vallée / KENTKART). Gli orari Arriva sono PDF sul sito aosta.arriva.it; il PDF della linea 110 porta la data "dal 01.06.2025", pubblicato anche oggi sul sito. Orari reali in tempo reale NON disponibili. Proposta, non approvata: partire dalla sola linea 110 con orari trascritti e data di validità mostrata.
+- **Opzioni discusse, non decise**: (1) limite di distanza per il percorso a piedi (es. 5 km) con suggerimento di auto; (2) avviso rosso più forte con conferma prima di avviare; (3) calcolo proprio sui dati OSM con server/PostGIS. Consigliate 1+2, in attesa di Max.
 
 ### D34 - Foto satellitari (2026-11-10)
 ## Decisione
@@ -786,3 +785,92 @@ Risoluzione circa 10 m per pixel: oltre lo zoom 14 l'immagine si ingrandisce e d
 - **Luoghi toccabili**: toccando un luogo della mappa di base (livello `poi` di OpenFreeMap) compare una scheda con nome, categoria e percorso a piedi / in auto / mezzi. "Più informazioni" (solo se premuto) chiede a Nominatim orari, telefono, sito e indirizzo cercando per nome in un riquadro di circa 100 m (`extratags=1`); le informazioni dipendono da cosa è scritto in OpenStreetMap e possono mancare. Alla richiesta partono il nome del luogo e le sue coordinate, non la posizione dell'utente. Le proprietà dei luoghi vengono scritte nel Terminale di Expo (`[mappa] luogo`) per capire che dati offre la mappa.
 - **Foto dei punti**: bucket Supabase `foto-punti` (pubblico, JPEG, 2 MB), tabella `foto_punti` (`database/11_foto_punti.sql`); foto ridotta a 1280 px più miniatura da 400 px; massimo 5 per punto e 10 al giorno per utente; scatto solo con la fotocamera e solo entro 50 m dal punto (GPS letto una sola volta e non salvato); obbligatoria quando si aggiunge un punto (solo controllo nell'app, il database non la impone). Provata da Max sul telefono: "funziona perfettamente". Non verificato se la ricodifica elimini i dati di posizione (EXIF) della foto.
 - **Accesso "strada e sentiero"**: nuovo valore `entrambi` per "Come si raggiunge" (`database/12_accesso_entrambi.sql`).
+
+## D36 - Statale a piedi: avviso, distanza e percorso alternativo (2026-11-16; provata sul telefono da Max, funziona)
+
+### Problema
+A piedi il percorso può passare sulla statale, dove spesso manca il marciapiede (PS-003). OpenRouteService non ha un controllo "evita la statale" per i percorsi a piedi, e i dati OpenStreetMap sui marciapiedi sono troppo incompleti per decidere "passa solo dove c'è il marciapiede": misura del 2026-11-16 con `strumenti/marciapiedi_statali.py` (918 tratti, 160,9 km): marciapiede presente 3,8%, separato 0,5%, assente 4,8%, non indicato 91,0%.
+
+### Alternative
+- Passare dalla statale solo dove c'è il marciapiede (scartata: dati insufficienti).
+- Avvisare sempre e lasciare scegliere all'utente tra percorso diretto e percorso alternativo, anche se più lungo (scelta).
+- Aggiungere i marciapiedi mancanti su OpenStreetMap con i nostri rilievi (scelta, come lavoro a parte, da fare).
+
+### Scelta
+Max (2026-11-16): avviso quando si passa sulla statale, con avviso forte sui tratti lunghi e la scritta di quanta strada c'è da percorrere; dare sempre anche il percorso alternativo (anche se più lungo) e lasciare scegliere all'utente; aggiungere i marciapiedi mancanti con i nostri rilievi.
+Nel codice: `calcolaPercorso` restituisce il percorso diretto e, se passa sulla statale per più di 30 m, un'alternativa che la evita il più possibile (fino a 3 ricalcoli). Avviso forte se la statale è almeno 1 km in tutto o un singolo tratto è almeno 500 m. La scheda mostra i metri totali e il tratto più lungo, e un pulsante per passare da un percorso all'altro.
+
+### Motivazione
+Il servizio non sa se c'è il marciapiede: l'app può dire quanta statale c'è, ma la scelta di passare o no è dell'utente.
+
+### Conseguenze
+- Se ORS non trova un'alternativa, l'app mostra solo il percorso diretto con l'avviso.
+- Il riconoscimento della statale dipende dai dati OpenStreetMap di ORS: può mancare qualche tratto.
+- Ogni alternativa costa fino a 3 richieste in più a ORS (limite giornaliero gratuito).
+- File: `lib/percorso.ts`, `components/scheda-percorso.tsx`, `app/index.tsx`. Compila (tsc senza errori nuovi); provata da Max sul telefono.
+- I marciapiedi su OpenStreetMap: lavoro separato, non iniziato.
+
+## D37 - Blocco degli utenti e valutazione delle segnalazioni (APPROVATA 2026-11-16; database eseguito e provato, app non ancora provata)
+Sostituisce la proposta D32.
+
+### Decisione
+- Ogni segnalazione di un utente viene valutata da un amministratore (Max o Mayo) dal pannello di Supabase: stato `nuova`, `confermata`, `respinta`.
+- Utente segnalato: blocco di 1 mese con 3 segnalazioni confermate da 3 persone diverse.
+- Segnalante: blocco di 1 mese quando 3 sue segnalazioni contro lo stesso account sono state respinte.
+- Utente bloccato: può accedere e guardare la mappa; non può aggiungere punti, foto, segnalazioni, voti, avvisi.
+- Dopo un blocco il conteggio riparte.
+- Avvisi email (stesso servizio Google Apps Script) per segnalazioni di utenti, di foto e per ogni blocco.
+
+### Alternative
+Impedire l'accesso (non scelto); contare 3 conferme anche dalla stessa persona; 3 respinte in totale; bloccare il dispositivo (D32: non affidabile a costo zero).
+
+### Scelta e motivazione
+Le risposte di Max del 2026-11-16. I blocchi stanno in una tabella `blocchi` separata, non in `profili`, perché ognuno può modificare il proprio profilo e si toglierebbe il blocco da solo.
+
+### Conseguenze e limiti
+- File: `database/14_ban_e_valutazione_segnalazioni.sql`, `app-mobile/src/hooks/use-blocco.ts`, messaggi nell'app (Aggiungi, Avviso, foto, segnalazioni).
+- Chi viene bloccato può eludere il blocco registrando un altro account (o eliminando l'account e rifacendolo): non è risolto.
+- Le segnalazioni delle foto non contano per il blocco degli utenti: sono solo un avviso agli admin.
+- Dopo il SQL, una persona può fare più segnalazioni contro lo stesso account, ma una sola alla volta in attesa.
+- Provato il 2026-11-16 con `database/prove/14_prova_blocchi.sql` (utenti finti, tutto annullato): 9 controlli su 9 superati (conferme, respinte, stessa persona, segnalazione in attesa doppia, avviso bloccato/non bloccato). NON provati: il messaggio nell'app e l'arrivo delle email.
+
+## D38 - Confine vero della Valle d'Aosta (2026-11-16; app: Mayo, provata su iPhone; database: database eseguito e provato 14/14; app di Mayo provata su iPhone, merge ancora da fare)
+
+### Problema
+Il controllo "il punto è in Valle d'Aosta?" usava un rettangolo (lat 45.46-45.99, lon 6.80-7.95, file 09 e 10): includeva zone di Piemonte, Svizzera e Francia.
+
+### Alternative
+- Tenere il rettangolo (semplice, ma impreciso).
+- Confine vero nell'app e nel database (PostGIS) con lo stesso contorno.
+- Confine ad alta precisione (file molto più pesante, poco utile per il nostro scopo).
+
+### Scelta
+Contorno ISTAT (limiti amministrativi 2026, licenza CC BY 4.0) tramite openpolis, semplificato a 100 m (279 punti). Mayo lo ha messo nell'app (`confine-vda.ts`, `confini.ts`, linea tratteggiata sulla mappa). Max ha scritto `database/15_confine_vero_postgis.sql`: funzione `dentro_valle_daosta(lat, lon)` con PostGIS, che sostituisce i vincoli del rettangolo su `punti` e `avvisi`.
+
+### Motivazione
+Il controllo fatto dal database è quello che conta davvero (l'app si può aggirare). Lo stesso contorno in app e database dà risultati coerenti.
+
+### Conseguenze
+- Confine vero della Valle d'Aosta: dati ISTAT 2026 (CC BY 4.0) via openpolis, semplificati a 100 m (279 punti). Il controllo può differire fino a circa 100 m dal confine ufficiale e non è un'indicazione legale; il database ha ancora il rettangolo finché non c'è il controllo PostGIS (file 15).
+- Il file 15 si ferma con un errore se esistono già punti o avvisi fuori dal confine vero, senza cambiare nulla.
+- Il contorno è duplicato (TypeScript e SQL): se cambia, va aggiornato in entrambi.
+- Provato il 2026-11-16 con `database/prove/15_prova_confine.sql`: 14 località su 14 corrette (risultati attesi calcolati in Python con un altro metodo). Le località sono lontane dal confine tranne Cervinia: la precisione vicino al bordo non è misurata.
+
+## D39 - Colori raccolti in un solo punto (2026-11-16; provata sul telefono da Max, funziona)
+
+### Problema
+Nel codice c'erano circa 15 colori scritti a mano in molti file: cambiare l'aspetto dell'app voleva dire modificare decine di righe.
+
+### Alternative
+- Lasciare i colori sparsi.
+- Raccoglierli in `constants/theme.ts` con il nome del loro ruolo, senza cambiare l'aspetto (scelta).
+- Cambiare subito la palette (rimandato: prima si sceglie la palette, poi si applica).
+
+### Scelta
+Oggetto `Palette` in `constants/theme.ts` organizzato secondo la regola 60-30-10: 60% superfici neutre, 30% colore secondario (blu scuro `#18395a`), 10% accento (`#2563eb`); avvisi e pericoli come colori di servizio. Sostituiti 162 usi in 15 file con `Palette.<nome>`.
+
+### Conseguenze
+- Aspetto invariato: i valori sono gli stessi di prima.
+- Esclusi: la mappa (`mappa.tsx`, colori dentro la pagina web della mappa), i colori dei marker, il tema chiaro/scuro del modello iniziale e alcuni colori usati una sola volta.
+- Prossimo passo: scegliere una palette (accento più distinto dal blu scuro) e cambiare solo i valori di `Palette`.
+

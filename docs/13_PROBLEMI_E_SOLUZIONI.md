@@ -37,6 +37,7 @@ Qui si registrano gli errori importanti: cosa è successo, cosa significa, causa
 - **Da fare**: controllare "Posta inviata" su Gmail; confrontare la chiave; aggiungere nello script una riga di log (`console.log`) per vedere quale ramo viene eseguito; ricreare il segreto con `delete from vault.secrets where name = 'avviso_segnalazioni_url'` e `vault.create_secret(...)`.
 - **Nota**: `select ... from net._http_response` ha dato "relation does not exist" nel progetto di Max: l'esito delle richieste di `pg_net` va cercato in un altro modo (da verificare nella documentazione di `pg_net`).
 - **Conseguenza**: finché non è risolto, le segnalazioni di utenti si salvano nella tabella `segnalazioni_utenti` ma Max e Mayo devono controllarla a mano nel pannello di Supabase.
+- **Aggiornamento 2026-11-16**: lo script `servizi/avviso-email.gs` ora scrive nel registro ogni passaggio (chiave rifiutata, destinatari mancanti, errore di invio, email inviata) e gestisce tre tipi di avviso. Per usarlo va incollato di nuovo in Apps Script e ridistribuito con una NUOVA VERSIONE. Poi si guarda Esecuzioni > Log. Causa ancora non trovata.
 - **Esito**: da compilare.
 
 ## PS-003 - Il percorso a piedi passa sulla statale (APERTO, da rifinire)
@@ -45,3 +46,10 @@ Qui si registrano gli errori importanti: cosa è successo, cosa significa, causa
 - **Controllo sui dati**: un percorso senza statale tra Aosta e Verrès esiste in OSM ma è di circa 42,1 km.
 - **Non ancora chiarito**: se ORS ha ricevuto e applicato le zone da evitare. Aggiunti messaggi `[percorso]` nel Terminale di Expo; vanno letti dopo una prova (il test con le righe stampate non è stato ancora fatto).
 - **Esito**: da compilare. Decisione di prodotto in attesa di Max (vedi D33: limite di distanza + avviso).
+
+## PS-004 - La prova del confine (SQL 15) dava "function dentro_valle_daosta(...) does not exist"
+- **Cosa significa**: PostgreSQL non trova una funzione con quel nome e con quei tipi di parametri.
+- **Prima ipotesi (SBAGLIATA)**: i numeri della prova erano `numeric` e la funzione vuole `double precision`. Ho aggiunto la conversione `::double precision`, ma l'errore è rimasto identico.
+- **Causa vera**: la funzione non esisteva proprio, perché il file 15 non era ancora stato eseguito (controllo: `select proname from pg_proc where proname = 'dentro_valle_daosta'` -> nessuna riga).
+- **Lezione**: prima di cambiare il codice, verificare che quello che si sta chiamando esista davvero; avevo affermato che la funzione esisteva senza controllarlo.
+- **Stato**: da eseguire prima il file 15, poi rieseguire la prova.

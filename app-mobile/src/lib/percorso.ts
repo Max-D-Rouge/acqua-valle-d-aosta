@@ -17,6 +17,10 @@ export type Percorso = {
   passi: Passo[];
   // Metri del percorso che passano su strada statale (tipo di strada "state road" di ORS).
   statale: number;
+  // Il tratto di statale più lungo senza interruzioni, in metri.
+  statalePiuLungo: number;
+  // true = percorso calcolato cercando di evitare la statale (può essere più lungo).
+  evitaStatale: boolean;
   mezzo: Mezzo;
 };
 
@@ -84,11 +88,15 @@ async function chiedi(da: Punto, a: Punto, mezzo: Mezzo, zoneDaEvitare: Coord[][
     // Tipo 1 = "strada statale" secondo ORS (strade primary/trunk di OpenStreetMap). Raccogliamo i tratti.
     const statali: Coord[][] = [];
     let statale = 0;
+    let piuLungo = 0;
     for (const [inizio, fine, tipo] of (f.properties.extras?.waytype ?? f.properties.extras?.waytypes)?.values ?? []) {
       if (tipo !== 1) continue;
       const tratto = coordinate.slice(inizio, fine + 1);
       statali.push(tratto);
-      for (let i = 0; i < tratto.length - 1; i++) statale += distanzaM(tratto[i], tratto[i + 1]);
+      let lunghezza = 0;
+      for (let i = 0; i < tratto.length - 1; i++) lunghezza += distanzaM(tratto[i], tratto[i + 1]);
+      statale += lunghezza;
+      piuLungo = Math.max(piuLungo, lunghezza);
     }
     console.log(`[percorso] ok: ${(f.properties.summary.distance / 1000).toFixed(1)} km, statale ${Math.round(statale)} m, tratti statale ${statali.length}, zone da evitare ${zoneDaEvitare.length}, extras: ${Object.keys(f.properties.extras ?? {}).join(',') || 'nessuno'}`);
     return {
@@ -96,6 +104,8 @@ async function chiedi(da: Punto, a: Punto, mezzo: Mezzo, zoneDaEvitare: Coord[][
       percorso: {
         coordinate,
         statale: mezzo === 'piedi' ? statale : 0,
+        statalePiuLungo: mezzo === 'piedi' ? piuLungo : 0,
+        evitaStatale: zoneDaEvitare.length > 0,
         mezzo,
         distanzaM: f.properties.summary.distance,
         durataS: f.properties.summary.duration,
@@ -144,25 +154,29 @@ function zoneDaiTratti(tratti: Coord[][]): Coord[][] {
   return zone;
 }
 
-// Restituisce il percorso oppure un testo che spiega cosa non ha funzionato.
-// A piedi: se il percorso passa sulla statale, rifà il calcolo evitando quei tratti (fino a 3 volte)
-// e tiene il percorso con meno metri di statale. Se non ne trova uno senza, avvisa (vedi scheda-percorso).
-export async function calcolaPercorso(da: Punto, a: Punto, mezzo: Mezzo = 'piedi'): Promise<{ percorso: Percorso } | { errore: string }> {
-  let esito = await chiedi(da, a, mezzo, []);
-  if ('errore' in esito) return { errore: esito.errore };
-  let migliore = esito.percorso;
-  if (mezzo === 'piedi') {
+// Restituisce il percorso più diretto e, se il più diretto passa sulla statale, anche un'alternativa che
+// la evita il più possibile (può essere più lunga): sceglie l'utente. Oppure un testo che spiega cosa non ha funzionato.
+// L'alternativa si cerca rifacendo il calcolo evitando i tratti di statale (fino a 3 volte, 1 richiesta ciascuna).
+export async function calcolaPercorso(da: Punto, a: Punto, mezzo: Mezzo = 'piedi'): Promise<{ percorso: Percorso; alternativa: Percorso | null } | { errore: string }> {
+  const primo = await chiedi(da, a, mezzo, []);
+  if ('errore' in primo) return { errore: primo.errore };
+  const diretto = primo.percorso;
+  let alternativa: Percorso | null = null;
+  if (mezzo === 'piedi' && diretto.statale > 30) {
+    let esito: Esito = primo;
     let zone: Coord[][] = [];
-    for (let prova = 0; prova < TENTATIVI_EVITA_STATALE && esito.statali.length > 0 && migliore.statale > 30; prova++) {
+    let migliore = diretto;
+    for (let prova = 0; prova < TENTATIVI_EVITA_STATALE && 'percorso' in esito && esito.statali.length > 0 && migliore.statale > 30; prova++) {
       zone = zone.concat(zoneDaiTratti(esito.statali));
-      const nuovo = await chiedi(da, a, mezzo, zone);
+      esito = await chiedi(da, a, mezzo, zone);
       // Se il servizio non trova un altro percorso, teniamo il migliore trovato finora.
-      if ('errore' in nuovo) break;
-      esito = nuovo;
-      if (nuovo.percorso.statale < migliore.statale) migliore = nuovo.percorso;
+      if ('errore' in esito) break;
+      if (esito.percorso.statale < migliore.statale) migliore = esito.percorso;
     }
+    // Lo proponiamo solo se evita davvero una parte significativa di statale.
+    if (migliore !== diretto && migliore.statale < diretto.statale - 30) alternativa = migliore;
   }
-  return { percorso: migliore };
+  return { percorso: diretto, alternativa };
 }
 
 export function formattaDistanza(m: number): string {

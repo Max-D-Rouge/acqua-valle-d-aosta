@@ -2,10 +2,12 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { testoBlocco, useBlocco } from '@/hooks/use-blocco';
 import { useFoto } from '@/hooks/use-foto';
 import { useSessione } from '@/hooks/use-sessione';
 import { supabase } from '@/lib/supabase';
 import { caricaFoto, controllaArea, eliminaFoto, MAX_FOTO_PER_PUNTO, RAGGIO_AREA_M, scattaFoto, urlFoto, type Foto } from '@/lib/foto';
+import { Palette } from '@/constants/theme';
 
 const MOTIVI_FOTO = [
   { valore: 'non_e_il_punto', etichetta: 'Non è questo punto' },
@@ -17,6 +19,7 @@ const MOTIVI_FOTO = [
 export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number; lon: number }) {
   const { sessione } = useSessione();
   const { foto, ricarica } = useFoto(puntoId, true);
+  const { fino: bloccoFino } = useBlocco(sessione?.user.id ?? null);
   const [inCorso, setInCorso] = useState(false);
   const [messaggio, setMessaggio] = useState<string | null>(null);
   const [aperta, setAperta] = useState<Foto | null>(null);
@@ -88,7 +91,9 @@ export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number;
         <Text style={styles.vuoto}>Nessuna foto per ora.</Text>
       )}
 
-      {sessione ? (
+      {sessione && bloccoFino ? (
+        <Text style={styles.vuoto}>{testoBlocco(bloccoFino)}</Text>
+      ) : sessione ? (
         piene ? (
           <Text style={styles.vuoto}>Questo punto ha già {MAX_FOTO_PER_PUNTO} foto.</Text>
         ) : (
@@ -142,22 +147,22 @@ export function FotoPunto({ puntoId, lat, lon }: { puntoId: string; lat: number;
 
 const styles = StyleSheet.create({
   contenitore: { gap: 8, marginTop: 8 },
-  titolo: { fontSize: 15, fontWeight: '700', color: '#18395a' },
+  titolo: { fontSize: 15, fontWeight: '700', color: Palette.secondario },
   fila: { gap: 8 },
   miniatura: { width: 90, height: 90, borderRadius: 10, backgroundColor: '#e5edf3' },
-  vuoto: { fontSize: 13, color: '#6b7680' },
-  pulsante: { flex: 1, backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
-  testoPulsante: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
-  elimina: { backgroundColor: '#d64545' },
+  vuoto: { fontSize: 13, color: Palette.testoTenue },
+  pulsante: { flex: 1, backgroundColor: Palette.secondario, borderRadius: 12, paddingVertical: 10, alignItems: 'center' },
+  testoPulsante: { color: Palette.superficie, fontSize: 15, fontWeight: '600' },
+  elimina: { backgroundColor: Palette.pericolo },
   errore: { fontSize: 13, color: '#b42318' },
-  nota: { fontSize: 12, color: '#6b7680' },
+  nota: { fontSize: 12, color: Palette.testoTenue },
   sfondo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', padding: 16, gap: 16 },
   grande: { width: '100%', height: '75%' },
   azioni: { flexDirection: 'row', gap: 8 },
   segnala: { gap: 8, alignItems: 'center' },
   motivi: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
-  motivo: { borderWidth: 1, borderColor: '#ffffff', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },
-  testoMotivo: { color: '#ffffff', fontSize: 13 },
-  linkSegnala: { color: '#ffffff', fontSize: 14, textDecorationLine: 'underline' },
-  esitoSegnalazione: { color: '#ffffff', fontSize: 13 },
+  motivo: { borderWidth: 1, borderColor: Palette.superficie, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },
+  testoMotivo: { color: Palette.superficie, fontSize: 13 },
+  linkSegnala: { color: Palette.superficie, fontSize: 14, textDecorationLine: 'underline' },
+  esitoSegnalazione: { color: Palette.superficie, fontSize: 13 },
 });

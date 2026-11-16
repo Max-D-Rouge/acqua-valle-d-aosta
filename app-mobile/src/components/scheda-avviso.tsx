@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import { TIPI_AVVISO, type Avviso } from '@/data/avvisi';
 import { useSessione } from '@/hooks/use-sessione';
 import { supabase } from '@/lib/supabase';
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#ffffff',
+    backgroundColor: Palette.superficie,
     borderRadius: 16,
     borderLeftWidth: 6,
     borderLeftColor: '#f59e0b',
@@ -63,9 +63,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   badge: { alignSelf: 'flex-start', backgroundColor: '#ffedd5', borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10 },
-  testoBadge: { fontSize: 13, fontWeight: '700', color: '#b45309' },
-  titolo: { fontSize: 18, fontWeight: '700', color: '#18395a' },
-  nota: { fontSize: 14, color: '#4a5560' },
-  scadenza: { fontSize: 12, color: '#6b7680' },
-  rimuovi: { fontSize: 14, color: '#d64545', textDecorationLine: 'underline' },
+  testoBadge: { fontSize: 13, fontWeight: '700', color: Palette.avviso },
+  titolo: { fontSize: 18, fontWeight: '700', color: Palette.secondario },
+  nota: { fontSize: 14, color: Palette.testo },
+  scadenza: { fontSize: 12, color: Palette.testoTenue },
+  rimuovi: { fontSize: 14, color: Palette.pericolo, textDecorationLine: 'underline' },
 });

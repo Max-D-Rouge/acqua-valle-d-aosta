@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import { useProfilo } from '@/hooks/use-profilo';
 import { useSessione } from '@/hooks/use-sessione';
 import { supabase } from '@/lib/supabase';
@@ -93,7 +93,7 @@ export default function ProfiloScreen() {
           <TextInput
             style={styles.campo}
             placeholder="Es. fontanaro_92"
-            placeholderTextColor="#7a8590"
+            placeholderTextColor={Palette.testoSfumato}
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={20}
@@ -139,7 +139,7 @@ export default function ProfiloScreen() {
       <TextInput
         style={styles.campo}
         placeholder="Email"
-        placeholderTextColor="#7a8590"
+        placeholderTextColor={Palette.testoSfumato}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
@@ -149,7 +149,7 @@ export default function ProfiloScreen() {
       <TextInput
         style={styles.campo}
         placeholder="Password (almeno 6 caratteri)"
-        placeholderTextColor="#7a8590"
+        placeholderTextColor={Palette.testoSfumato}
         secureTextEntry
         autoCapitalize="none"
         value={password}
@@ -169,23 +169,23 @@ export default function ProfiloScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', backgroundColor: '#f7f5f2', padding: Spacing.four, gap: Spacing.three },
-  titolo: { fontSize: 28, fontWeight: '700', color: '#18395a' },
-  testo: { fontSize: 16, color: '#4a5560' },
-  email: { fontSize: 18, fontWeight: '600', color: '#18395a' },
+  container: { flex: 1, justifyContent: 'center', backgroundColor: Palette.sfondo, padding: Spacing.four, gap: Spacing.three },
+  titolo: { fontSize: 28, fontWeight: '700', color: Palette.secondario },
+  testo: { fontSize: 16, color: Palette.testo },
+  email: { fontSize: 18, fontWeight: '600', color: Palette.secondario },
   campo: {
     borderWidth: 1,
-    borderColor: '#c5ccd3',
+    borderColor: Palette.bordo,
     borderRadius: 10,
     padding: Spacing.three,
     fontSize: 16,
-    backgroundColor: '#ffffff',
-    color: '#18395a',
+    backgroundColor: Palette.superficie,
+    color: Palette.secondario,
   },
-  pulsante: { backgroundColor: '#18395a', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  pulsante: { backgroundColor: Palette.secondario, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   disattivo: { opacity: 0.5 },
-  testoPulsante: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
-  eliminare: { color: '#d64545', textAlign: 'center', fontSize: 14, textDecorationLine: 'underline', marginTop: Spacing.three },
-  link: { color: '#18395a', textAlign: 'center', fontSize: 15, textDecorationLine: 'underline' },
-  messaggio: { backgroundColor: '#fff3cd', borderRadius: 8, padding: Spacing.two, color: '#5c4400' },
+  testoPulsante: { color: Palette.superficie, fontSize: 16, fontWeight: '600' },
+  eliminare: { color: Palette.pericolo, textAlign: 'center', fontSize: 14, textDecorationLine: 'underline', marginTop: Spacing.three },
+  link: { color: Palette.secondario, textAlign: 'center', fontSize: 15, textDecorationLine: 'underline' },
+  messaggio: { backgroundColor: Palette.avvisoSfondo, borderRadius: 8, padding: Spacing.two, color: Palette.avvisoTesto },
 });

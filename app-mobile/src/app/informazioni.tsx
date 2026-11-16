@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 
 export default function InformazioniScreen() {
   return (
@@ -59,11 +59,11 @@ export default function InformazioniScreen() {
 }
 
 const styles = StyleSheet.create({
-  sfondo: { flex: 1, backgroundColor: '#f7f5f2' },
+  sfondo: { flex: 1, backgroundColor: Palette.sfondo },
   container: { padding: Spacing.four, paddingTop: Spacing.six, gap: Spacing.three },
-  titolo: { fontSize: 28, fontWeight: '700', color: '#18395a' },
-  sezione: { fontSize: 20, fontWeight: '600', color: '#18395a', marginTop: Spacing.three },
-  testo: { fontSize: 16, color: '#4a5560', lineHeight: 22 },
-  avviso: { backgroundColor: '#fff3cd', borderRadius: 8, padding: Spacing.three },
-  avvisoTesto: { color: '#5c4400', fontSize: 16, lineHeight: 22 },
+  titolo: { fontSize: 28, fontWeight: '700', color: Palette.secondario },
+  sezione: { fontSize: 20, fontWeight: '600', color: Palette.secondario, marginTop: Spacing.three },
+  testo: { fontSize: 16, color: Palette.testo, lineHeight: 22 },
+  avviso: { backgroundColor: Palette.avvisoSfondo, borderRadius: 8, padding: Spacing.three },
+  avvisoTesto: { color: Palette.avvisoTesto, fontSize: 16, lineHeight: 22 },
 });

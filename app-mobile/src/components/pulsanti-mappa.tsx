@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Palette } from '@/constants/theme';
 
 type Props = {
   satellite: boolean;
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: Palette.superficie,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -36,8 +37,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     elevation: 4,
   },
-  attivo: { backgroundColor: '#18395a' },
+  attivo: { backgroundColor: Palette.secondario },
   simbolo: { fontSize: 20 },
-  testo: { fontSize: 15, fontWeight: '800', color: '#18395a' },
-  testoAttivo: { color: '#ffffff' },
+  testo: { fontSize: 15, fontWeight: '800', color: Palette.secondario },
+  testoAttivo: { color: Palette.superficie },
 });

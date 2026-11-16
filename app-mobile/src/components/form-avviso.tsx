@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import { TIPI_AVVISO, type TipoAvviso } from '@/data/avvisi';
 import { supabase } from '@/lib/supabase';
 
@@ -57,7 +57,7 @@ export function FormAvviso({ visibile, posizione, onChiudi, onSalvato }: Props) 
           <TextInput
             style={styles.campo}
             placeholder="Nota (facoltativa)"
-            placeholderTextColor="#7a8590"
+            placeholderTextColor={Palette.testoSfumato}
             maxLength={200}
             value={nota}
             onChangeText={setNota}
@@ -77,18 +77,18 @@ export function FormAvviso({ visibile, posizione, onChiudi, onSalvato }: Props) 
 
 const styles = StyleSheet.create({
   sfondo: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  foglio: { backgroundColor: '#f7f5f2', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: Spacing.four, gap: Spacing.two },
-  titolo: { fontSize: 22, fontWeight: '700', color: '#18395a' },
-  nota: { fontSize: 14, color: '#4a5560' },
+  foglio: { backgroundColor: Palette.sfondo, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: Spacing.four, gap: Spacing.two },
+  titolo: { fontSize: 22, fontWeight: '700', color: Palette.secondario },
+  nota: { fontSize: 14, color: Palette.testo },
   riga: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  scelta: { borderWidth: 1, borderColor: '#b45309', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: '#ffffff' },
-  sceltaAttiva: { backgroundColor: '#b45309' },
-  testoScelta: { fontSize: 14, color: '#b45309' },
-  testoSceltaAttiva: { color: '#ffffff', fontWeight: '600' },
-  campo: { borderWidth: 1, borderColor: '#c5ccd3', borderRadius: 10, padding: Spacing.three, fontSize: 16, backgroundColor: '#ffffff', color: '#18395a' },
-  messaggio: { backgroundColor: '#fff3cd', borderRadius: 8, padding: Spacing.two, color: '#5c4400' },
-  pulsante: { backgroundColor: '#b45309', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  scelta: { borderWidth: 1, borderColor: Palette.avviso, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: Palette.superficie },
+  sceltaAttiva: { backgroundColor: Palette.avviso },
+  testoScelta: { fontSize: 14, color: Palette.avviso },
+  testoSceltaAttiva: { color: Palette.superficie, fontWeight: '600' },
+  campo: { borderWidth: 1, borderColor: Palette.bordo, borderRadius: 10, padding: Spacing.three, fontSize: 16, backgroundColor: Palette.superficie, color: Palette.secondario },
+  messaggio: { backgroundColor: Palette.avvisoSfondo, borderRadius: 8, padding: Spacing.two, color: Palette.avvisoTesto },
+  pulsante: { backgroundColor: Palette.avviso, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   spento: { opacity: 0.5 },
-  testoPulsante: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-  annulla: { color: '#18395a', textAlign: 'center', fontSize: 15, textDecorationLine: 'underline' },
+  testoPulsante: { color: Palette.superficie, fontSize: 16, fontWeight: '700' },
+  annulla: { color: Palette.secondario, textAlign: 'center', fontSize: 15, textDecorationLine: 'underline' },
 });

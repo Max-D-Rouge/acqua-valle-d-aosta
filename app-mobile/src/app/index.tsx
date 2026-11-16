@@ -12,13 +12,14 @@ import { SchedaLuogo, type LuogoMappa } from '@/components/scheda-luogo';
 import { SchedaNavigazione } from '@/components/scheda-navigazione';
 import { SchedaPercorso } from '@/components/scheda-percorso';
 import { SchedaPunto } from '@/components/scheda-punto';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, Spacing, Palette } from '@/constants/theme';
 import { useAvvisi } from '@/hooks/use-avvisi';
 import { useNavigazione } from '@/hooks/use-navigazione';
 import { usePunti } from '@/hooks/use-punti';
 import type { PuntoAcqua } from '@/data/punti';
 import { dentroValleDAosta } from '@/lib/confini';
 import { calcolaPercorso, type Mezzo, type Percorso } from '@/lib/percorso';
+import { testoBlocco, useBlocco } from '@/hooks/use-blocco';
 import { useSessione } from '@/hooks/use-sessione';
 
 export default function MappaScreen() {
@@ -33,7 +34,7 @@ export default function MappaScreen() {
   const [modoScelta, setModoScelta] = useState<'punto' | 'avviso'>('punto');
   const [formAvvisoAperto, setFormAvvisoAperto] = useState(false);
   // "arrivo" serve a ricalcolare il percorso se esci dalla strada durante la navigazione.
-  const [percorso, setPercorso] = useState<{ destinazione: string; arrivo: { lat: number; lon: number }; dati: Percorso } | null>(null);
+  const [percorso, setPercorso] = useState<{ destinazione: string; arrivo: { lat: number; lon: number }; dati: Percorso; alternativa: Percorso | null } | null>(null);
   const [navigazione, setNavigazione] = useState(false);
   const [satellite, setSatellite] = useState(false);
   const [rilievo, setRilievo] = useState(false);
@@ -42,6 +43,7 @@ export default function MappaScreen() {
   const { punti, errore, ricarica } = usePunti();
   const { avvisi, ricarica: ricaricaAvvisi } = useAvvisi();
   const { sessione } = useSessione();
+  const { fino: bloccoFino } = useBlocco(sessione?.user.id ?? null);
   const punto = punti?.find((p) => p.id === selezionato);
   const avviso = avvisi.find((a) => a.id === avvisoScelto);
 
@@ -55,7 +57,9 @@ export default function MappaScreen() {
       setMessaggio(risultato.errore);
       return;
     }
-    setPercorso({ ...percorso, dati: risultato.percorso });
+    // Si resta sul tipo di percorso scelto (con o senza statale), se ancora disponibile.
+    const nuovo = percorso.dati.evitaStatale && risultato.alternativa ? risultato.alternativa : risultato.percorso;
+    setPercorso({ ...percorso, dati: nuovo, alternativa: null });
   }
   const { stato: statoNav, errore: erroreNav } = useNavigazione(navigazione, percorso?.dati ?? null, ricalcolaDa);
 
@@ -106,7 +110,7 @@ export default function MappaScreen() {
     setMessaggio(null);
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      setMessaggio("Senza il permesso di posizione non posso calcolare il percorso. Puoi usare il pulsante 'Mezzi', che apre l'app delle mappe.");
+      setMessaggio("Senza il permesso di posizione non posso calcolare il percorso.");
       return;
     }
     setMessaggio('Calcolo il percorso...');
@@ -126,13 +130,17 @@ export default function MappaScreen() {
     }
     setMessaggio(null);
     setSelezionato(null);
-    setPercorso({ destinazione: p.nome, arrivo: { lat: p.lat, lon: p.lon }, dati: risultato.percorso });
+    setPercorso({ destinazione: p.nome, arrivo: { lat: p.lat, lon: p.lon }, dati: risultato.percorso, alternativa: risultato.alternativa });
   }
 
   // Aggiungere un punto richiede l'accesso: se non sei collegato ti rimandiamo al Profilo.
   function apriForm() {
     if (!sessione) {
       setMessaggio('Per aggiungere un punto accedi dalla scheda Profilo.');
+      return;
+    }
+    if (bloccoFino) {
+      setMessaggio(testoBlocco(bloccoFino));
       return;
     }
     setMessaggio(null);
@@ -146,6 +154,10 @@ export default function MappaScreen() {
   function apriAvviso() {
     if (!sessione) {
       setMessaggio('Per creare un avviso accedi dalla scheda Profilo.');
+      return;
+    }
+    if (bloccoFino) {
+      setMessaggio(testoBlocco(bloccoFino));
       return;
     }
     setMessaggio(null);
@@ -214,7 +226,7 @@ export default function MappaScreen() {
       <FormAvviso posizione={posizioneScelta} visibile={formAvvisoAperto} onChiudi={() => setFormAvvisoAperto(false)} onSalvato={dopoAvviso} />
 
       {avviso && <SchedaAvviso key={avviso.id} avviso={avviso} bottom={BottomTabInset + Spacing.four} onRimosso={() => { setAvvisoScelto(null); ricaricaAvvisi(); }} />}
-      {percorso && !navigazione && <SchedaPercorso destinazione={percorso.destinazione} percorso={percorso.dati} bottom={BottomTabInset + Spacing.four} onAvvia={() => setNavigazione(true)} onChiudi={() => setPercorso(null)} />}
+      {percorso && !navigazione && <SchedaPercorso destinazione={percorso.destinazione} percorso={percorso.dati} alternativa={percorso.alternativa} onScegli={(dati, altra) => setPercorso({ ...percorso, dati, alternativa: altra })} bottom={BottomTabInset + Spacing.four} onAvvia={() => setNavigazione(true)} onChiudi={() => setPercorso(null)} />}
       {percorso && navigazione && <SchedaNavigazione destinazione={percorso.destinazione} percorso={percorso.dati} stato={statoNav} ricalcolo={ricalcolo} errore={erroreNav} bottom={BottomTabInset + Spacing.four} onTermina={terminaNavigazione} />}
       {luogo && !percorso && !punto && <SchedaLuogo key={`${luogo.lat},${luogo.lon}`} luogo={luogo} bottom={BottomTabInset + Spacing.four} onPercorso={(l, m) => { setLuogo(null); percorsoVerso(l, m); }} onChiudi={() => setLuogo(null)} />}
       {punto && !percorso && <SchedaPunto key={punto.id} punto={punto} ricarica={ricarica} bottom={BottomTabInset + Spacing.four} onPercorso={percorsoVerso} />}
@@ -224,13 +236,13 @@ export default function MappaScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  caricamento: { flex: 1, textAlign: 'center', textAlignVertical: 'center', padding: Spacing.four, fontSize: 16, color: '#18395a' },
+  caricamento: { flex: 1, textAlign: 'center', textAlignVertical: 'center', padding: Spacing.four, fontSize: 16, color: Palette.secondario },
   banner: {
     position: 'absolute',
     top: 60,
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#18395a',
+    backgroundColor: Palette.secondario,
     borderRadius: 14,
     borderTopLeftRadius: 3,
     padding: Spacing.three,
@@ -239,16 +251,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
-  testoBanner: { color: '#ffffff', fontSize: 15, fontWeight: '600', flex: 1 },
+  testoBanner: { color: Palette.superficie, fontSize: 15, fontWeight: '600', flex: 1 },
   annulla: { color: '#7dd3fc', fontSize: 15, fontWeight: '700' },
   messaggio: {
     position: 'absolute',
     top: 60,
     left: Spacing.three,
     right: Spacing.three,
-    backgroundColor: '#fff3cd',
+    backgroundColor: Palette.avvisoSfondo,
     borderRadius: 8,
     padding: Spacing.two,
-    color: '#5c4400',
+    color: Palette.avvisoTesto,
   },
 });
