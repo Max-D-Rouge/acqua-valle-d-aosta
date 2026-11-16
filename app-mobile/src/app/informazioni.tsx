@@ -54,6 +54,7 @@ export default function InformazioniScreen() {
       <Text style={styles.testo}>Satellite: EOxCloudless (Sentinel-2, Copernicus) e ortofoto AGEA (CC BY 4.0).</Text>
       <Text style={styles.testo}>Rilievo 3D: Terrain Tiles (Mapzen/Tilezen, dati EU-DEM Copernicus).</Text>
       <Text style={styles.testo}>Percorsi: OpenRouteService (HeiGIT). Informazioni sui luoghi: Nominatim.</Text>
+      <Text style={styles.testo}>Confine della Valle d'Aosta (semplificato): ISTAT, limiti amministrativi 2026 (CC BY 4.0), ridistribuiti da openpolis.</Text>
     </ScrollView>
   );
 }
